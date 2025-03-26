@@ -34,17 +34,25 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 
 function ReceiverDashboard() {
     const [listings, setListings] = useState([]);
-    const [sortedListings, setSortedListings] = useState([]);
+    const [filteredListings, setFilteredListings] = useState([]); // Renamed from filteredListings, now the primary state
     const [trends, setTrends] = useState([]);
     const [selectedListing, setSelectedListing] = useState(null);
     const [route, setRoute] = useState(null);
     const [loading, setLoading] = useState(true);
     const [directionsLoading, setDirectionsLoading] = useState(false);
     const [userLocation, setUserLocation] = useState(null);
+    const [searchedLocation, setSearchedLocation] = useState(null);
+    const [searchAddress, setSearchAddress] = useState('');
+    const [searchError, setSearchError] = useState('');
+    const [suggestions, setSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [radius] = useState(50); // Radius in kilometers for filtering (adjustable)
     const navigate = useNavigate();
     const mapRef = useRef(null);
     const markersRef = useRef([]);
     const routeLayerRef = useRef(null);
+    const searchedMarkerRef = useRef(null);
+    const suggestionTimeoutRef = useRef(null);
 
     // Check authentication on mount
     useEffect(() => {
@@ -97,29 +105,136 @@ function ReceiverDashboard() {
         );
     }, []);
 
-    // Sort listings by distance
+    // Fetch suggestions as the user types (debounced)
+    const fetchSuggestions = async (query) => {
+        if (!query.trim()) {
+            setSuggestions([]);
+            setShowSuggestions(false);
+            return;
+        }
+
+        try {
+            const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+                params: {
+                    q: query,
+                    format: 'json',
+                    limit: 5,
+                },
+            });
+
+            setSuggestions(response.data);
+            setShowSuggestions(true);
+        } catch (err) {
+            console.error('Error fetching suggestions:', err);
+            setSuggestions([]);
+            setShowSuggestions(false);
+        }
+    };
+
+    // Handle input change with debouncing
+    const handleSearchInputChange = (e) => {
+        const value = e.target.value;
+        setSearchAddress(value);
+        setSearchError('');
+
+        if (suggestionTimeoutRef.current) {
+            clearTimeout(suggestionTimeoutRef.current);
+        }
+
+        suggestionTimeoutRef.current = setTimeout(() => {
+            fetchSuggestions(value);
+        }, 300);
+    };
+
+    // Handle suggestion selection
+    const handleSuggestionClick = (suggestion) => {
+        const { lat, lon, display_name } = suggestion;
+        const newLocation = { lat: parseFloat(lat), lng: parseFloat(lon), address: display_name };
+        setSearchedLocation(newLocation);
+        setSearchAddress(display_name);
+        setShowSuggestions(false);
+        setSuggestions([]);
+    };
+
+    // Handle address search using Nominatim API
+    const handleSearch = async (e) => {
+        e.preventDefault();
+        if (!searchAddress.trim()) {
+            setSearchError('Please enter an address to search.');
+            setShowSuggestions(false);
+            return;
+        }
+
+        setSearchError('');
+        setShowSuggestions(false);
+
+        try {
+            const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+                params: {
+                    q: searchAddress,
+                    format: 'json',
+                    limit: 1,
+                },
+            });
+
+            if (response.data.length === 0) {
+                setSearchError('No results found for the address. Please try a different search.');
+                return;
+            }
+
+            const { lat, lon, display_name } = response.data[0];
+            const newLocation = { lat: parseFloat(lat), lng: parseFloat(lon), address: display_name };
+            setSearchedLocation(newLocation);
+            setSearchAddress(display_name);
+        } catch (err) {
+            console.error('Search error:', err);
+            setSearchError('Failed to search for the address. Please try again.');
+        }
+    };
+
+    // Clear the searched location
+    const clearSearch = () => {
+        setSearchedLocation(null);
+        setSearchAddress('');
+        setSearchError('');
+        setSuggestions([]);
+        setShowSuggestions(false);
+        if (searchedMarkerRef.current) {
+            searchedMarkerRef.current.remove();
+            searchedMarkerRef.current = null;
+        }
+    };
+
+    // Sort and filter listings by distance
     useEffect(() => {
-        if (!userLocation || !listings.length) {
-            setSortedListings(listings);
+        const referenceLocation = searchedLocation || userLocation;
+        if (!referenceLocation || !listings.length) {
+            setFilteredListings(listings);
             return;
         }
 
         const sorted = [...listings].map(listing => {
             const distance = calculateDistance(
-                userLocation.lat,
-                userLocation.lng,
+                referenceLocation.lat,
+                referenceLocation.lng,
                 listing.location.latitude,
                 listing.location.longitude
             );
             return { ...listing, distance };
         }).sort((a, b) => a.distance - b.distance);
 
-        setSortedListings(sorted);
+        // Filter listings within the radius (only if searchedLocation is set)
+        if (searchedLocation) {
+            const filtered = sorted.filter(listing => listing.distance <= radius);
+            setFilteredListings(filtered);
+        } else {
+            setFilteredListings(sorted);
+        }
 
         if (sorted.length > 0 && !selectedListing) {
             setSelectedListing(sorted[0]);
         }
-    }, [userLocation, listings, selectedListing]);
+    }, [userLocation, searchedLocation, listings, selectedListing, radius]);
 
     // Initialize the map
     useEffect(() => {
@@ -158,7 +273,34 @@ function ReceiverDashboard() {
         };
     }, [loading, userLocation]);
 
-    // Update markers and route
+    // Update map center and markers when searched location changes
+    useEffect(() => {
+        if (!mapRef.current || !searchedLocation) return;
+
+        mapRef.current.setView([searchedLocation.lat, searchedLocation.lng], 10);
+
+        if (searchedMarkerRef.current) {
+            searchedMarkerRef.current.remove();
+        }
+
+        searchedMarkerRef.current = L.marker([searchedLocation.lat, searchedLocation.lng], {
+            icon: L.divIcon({
+                className: 'searched-location-marker',
+                html: '<div style="background-color: red; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;"></div>',
+                iconSize: [15, 15],
+                iconAnchor: [7.5, 7.5],
+            }),
+        })
+            .addTo(mapRef.current)
+            .bindPopup(`Searched Location: ${searchedLocation.address}`)
+            .openPopup();
+
+        setTimeout(() => {
+            mapRef.current.invalidateSize();
+        }, 0);
+    }, [searchedLocation]);
+
+    // Update markers and route for listings
     useEffect(() => {
         if (!mapRef.current) return;
 
@@ -169,7 +311,7 @@ function ReceiverDashboard() {
             routeLayerRef.current = null;
         }
 
-        sortedListings.forEach(listing => {
+        filteredListings.forEach(listing => {
             const marker = L.marker([listing.location.latitude, listing.location.longitude])
                 .addTo(mapRef.current)
                 .on('click', () => setSelectedListing(listing));
@@ -205,7 +347,7 @@ function ReceiverDashboard() {
                 mapRef.current.invalidateSize();
             }, 0);
         }
-    }, [sortedListings, selectedListing, directionsLoading]);
+    }, [filteredListings, selectedListing, directionsLoading]);
 
     const handleClaim = async (listingId) => {
         try {
@@ -305,6 +447,56 @@ function ReceiverDashboard() {
     return (
         <div className="dashboard-container receiver-dashboard">
             <h1>Receiver Dashboard</h1>
+
+            {/* Search Input for Location */}
+            <div style={{ marginBottom: '20px' }}>
+                <h3>Search for Food Listings by Location</h3>
+                <form onSubmit={handleSearch} className="search-form">
+                    <div className="location-search-wrapper">
+                        <input
+                            type="text"
+                            value={searchAddress}
+                            onChange={handleSearchInputChange}
+                            onFocus={() => setShowSuggestions(true)}
+                            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                            placeholder="Enter an address (e.g., 123 Main St, City)"
+                            className="search-input"
+                        />
+                        {showSuggestions && suggestions.length > 0 && (
+                            <ul className="suggestions-list">
+                                {suggestions.map((suggestion, index) => (
+                                    <li
+                                        key={index}
+                                        className="suggestion-item"
+                                        onMouseDown={() => handleSuggestionClick(suggestion)}
+                                    >
+                                        {suggestion.display_name}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                    <button type="submit" className="search-button">
+                        Search
+                    </button>
+                    {searchedLocation && (
+                        <button
+                            type="button"
+                            onClick={clearSearch}
+                            className="clear-button"
+                        >
+                            Clear Search
+                        </button>
+                    )}
+                </form>
+                {searchError && <p className="search-error">{searchError}</p>}
+                {searchedLocation && (
+                    <p className="search-info">
+                        Showing {filteredListings.length} listings near searched location: {searchedLocation.address} ({searchedLocation.lat.toFixed(4)}, {searchedLocation.lng.toFixed(4)})
+                    </p>
+                )}
+            </div>
+
             {loading ? (
                 <div className="loading-spinner">
                     <p>Loading listings...</p>
@@ -316,9 +508,9 @@ function ReceiverDashboard() {
                     <div id="map" style={{ height: '400px', marginBottom: '20px' }}></div>
 
                     {/* Listings List */}
-                    {sortedListings.length > 0 ? (
+                    {filteredListings.length > 0 ? (
                         <ul className="listings-list">
-                            {sortedListings.map((listing) => (
+                            {filteredListings.map((listing) => (
                                 <li key={listing._id} className="listing-item">
                                     <h3>{listing.title}</h3>
                                     <p>{listing.description}</p>
@@ -344,12 +536,14 @@ function ReceiverDashboard() {
                                 </li>
                             ))}
                         </ul>
+                    ) : searchedLocation ? (
+                        <p>No available listings within {radius} km of the searched location. Try clearing the search to see all listings.</p>
                     ) : (
                         <p>No available listings at the moment.</p>
                     )}
 
                     {/* Hidden buttons for Leaflet popups */}
-                    {sortedListings.map((listing) => (
+                    {filteredListings.map((listing) => (
                         <div key={listing._id} style={{ display: 'none' }}>
                             <button
                                 id={`claim-${listing._id}`}

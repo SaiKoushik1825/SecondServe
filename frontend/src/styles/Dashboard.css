@@ -24,6 +24,35 @@
     background-color: #303030; /* Fallback color (Dark Grey) */
 }
 
+/* Dashboard Header (for DonorDashboard) */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.logout-button {
+    padding: 10px 20px;
+    background-color: #f44336; /* Red button for logout */
+    color: #FFFFFF; /* White text */
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.logout-button:hover {
+    background-color: #d32f2f; /* Darker red on hover */
+    transform: scale(1.02);
+}
+
+.logout-button:focus {
+    outline: 3px solid #ef5350; /* Lighter red for focus outline */
+    outline-offset: 2px;
+}
+
 /* Headings */
 .dashboard-container h1 {
     font-size: 2.2rem;
@@ -42,8 +71,223 @@
 
 .dashboard-container h3 {
     font-size: 1.4rem;
-    color: #333; /* Darker color for contrast on white backgrounds */
+    color: #FFFFFF; /* White for consistency on dark background */
     margin-bottom: 15px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Improve readability */
+}
+
+/* Search Form (for ReceiverDashboard) */
+.search-container {
+    background-color: rgba(255, 255, 255, 0.95); /* White background with slight transparency */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.search-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    justify-content: center;
+}
+
+.search-input {
+    padding: 10px;
+    width: 300px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.search-input:focus {
+    border-color: #42A5F5; /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(66, 165, 245, 0.3);
+}
+
+.search-button,
+.clear-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.search-button {
+    background-color: #42A5F5; /* Blue button to match theme */
+    color: #FFFFFF; /* White text */
+}
+
+.search-button:hover {
+    background-color: #2196F3; /* Darker blue on hover */
+    transform: scale(1.02);
+}
+
+.search-button:focus {
+    outline: 3px solid #64B5F6; /* Lighter blue for focus outline */
+    outline-offset: 2px;
+}
+
+.search-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.clear-button {
+    background-color: #f44336; /* Red button for clear action */
+    color: #FFFFFF; /* White text */
+}
+
+.clear-button:hover {
+    background-color: #d32f2f; /* Darker red on hover */
+    transform: scale(1.02);
+}
+
+.clear-button:focus {
+    outline: 3px solid #ef5350; /* Lighter red for focus outline */
+    outline-offset: 2px;
+}
+
+.clear-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.search-error {
+    color: #f44336; /* Red for error messages */
+    margin-top: 5px;
+    font-size: 0.9rem;
+}
+
+.search-info {
+    color: #42A5F5; /* Blue for info messages */
+    margin-top: 5px;
+    font-size: 0.9rem;
+}
+
+/* Location Search Form (for DonorDashboard) */
+.location-search-container {
+    background-color: rgba(255, 255, 255, 0.95); /* White background with slight transparency */
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+}
+
+.location-search-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    justify-content: center;
+}
+
+.location-search-input {
+    padding: 10px;
+    width: 300px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.location-search-input:focus {
+    border-color: #42A5F5; /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(66, 165, 245, 0.3);
+}
+
+.location-search-button,
+.location-clear-button,
+.use-current-location-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.location-search-button {
+    background-color: #42A5F5; /* Blue button to match theme */
+    color: #FFFFFF; /* White text */
+}
+
+.location-search-button:hover {
+    background-color: #2196F3; /* Darker blue on hover */
+    transform: scale(1.02);
+}
+
+.location-search-button:focus {
+    outline: 3px solid #64B5F6; /* Lighter blue for focus outline */
+    outline-offset: 2px;
+}
+
+.location-search-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.location-clear-button {
+    background-color: #f44336; /* Red button for clear action */
+    color: #FFFFFF; /* White text */
+}
+
+.location-clear-button:hover {
+    background-color: #d32f2f; /* Darker red on hover */
+    transform: scale(1.02);
+}
+
+.location-clear-button:focus {
+    outline: 3px solid #ef5350; /* Lighter red for focus outline */
+    outline-offset: 2px;
+}
+
+.location-clear-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.use-current-location-button {
+    background-color: #66BB6A; /* Green to indicate location action */
+    color: #FFFFFF; /* White text */
+}
+
+.use-current-location-button:hover {
+    background-color: #4CAF50; /* Darker green on hover */
+    transform: scale(1.02);
+}
+
+.use-current-location-button:focus {
+    outline: 3px solid #81C784; /* Lighter green for focus outline */
+    outline-offset: 2px;
+}
+
+.use-current-location-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.location-search-error {
+    color: #f44336; /* Red for error messages */
+    margin-top: 5px;
+    font-size: 0.9rem;
+}
+
+.location-search-info {
+    color: #42A5F5; /* Blue for info messages */
+    margin-top: 5px;
+    font-size: 0.9rem;
 }
 
 /* Listings in ReceiverDashboard */
@@ -89,6 +333,7 @@
     cursor: pointer;
     transition: background-color 0.3s, transform 0.1s;
     margin-right: 10px;
+    margin-top: 5px; /* Added for better spacing */
 }
 
 .listing-item button:hover {
@@ -99,6 +344,12 @@
 .listing-item button:focus {
     outline: 3px solid #64B5F6; /* Lighter blue for focus outline */
     outline-offset: 2px;
+}
+
+.listing-item button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
 }
 
 /* Form styling (used in DonorDashboard) */
@@ -112,11 +363,15 @@
     gap: 20px;
 }
 
+.form-field {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
 .dashboard-form label {
     font-weight: 600;
     margin-bottom: 5px;
-    display: block;
-    text-align: left;
     color: #333;
 }
 
@@ -139,6 +394,17 @@
 .dashboard-form textarea:focus {
     border-color: #42A5F5; /* Blue border on focus */
     box-shadow: 0 0 5px rgba(66, 165, 245, 0.3);
+}
+
+.dashboard-form input.error,
+.dashboard-form textarea.error {
+    border-color: #f44336; /* Red border for errors */
+}
+
+.error-message {
+    color: #f44336; /* Red for error messages */
+    font-size: 0.9rem;
+    margin-top: 5px;
 }
 
 .dashboard-form button {
@@ -169,7 +435,7 @@
     transform: none;
 }
 
-/* Map styling */
+/* Map styling (for ReceiverDashboard) */
 #map {
     width: 100%;
     height: 400px;
@@ -184,7 +450,22 @@
     transform: scale(1.01); /* Subtle scale effect on hover */
 }
 
-/* User's location marker */
+/* Map styling for DonorDashboard */
+.donor-map {
+    width: 100%;
+    height: 300px; /* Slightly smaller than ReceiverDashboard map */
+    margin-top: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+}
+
+.donor-map:hover {
+    transform: scale(1.01); /* Subtle scale effect on hover */
+}
+
+/* User's location marker (for ReceiverDashboard) */
 .user-location-marker {
     background-color: #1976D2; /* Blue for user location */
     width: 16px;
@@ -194,7 +475,27 @@
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }
 
-/* Leaflet popup styling */
+/* Searched location marker (for ReceiverDashboard) */
+.searched-location-marker {
+    background-color: #f44336; /* Red for searched location */
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Selected location marker for DonorDashboard */
+.selected-location-marker {
+    background-color: #4CAF50; /* Green for selected location */
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Leaflet popup styling (for ReceiverDashboard and DonorDashboard) */
 .leaflet-popup-content-wrapper {
     border-radius: 8px;
     background-color: rgba(255, 255, 255, 0.98);
@@ -242,7 +543,7 @@
     transform: none;
 }
 
-/* Wastage report form and container */
+/* Wastage report form and container (for DonorDashboard) */
 .wastage-report-form {
     margin-bottom: 30px;
 }
@@ -277,6 +578,10 @@
 .wastage-report-form input:focus {
     border-color: #42A5F5; /* Blue border on focus */
     box-shadow: 0 0 5px rgba(66, 165, 245, 0.3);
+}
+
+.wastage-report-form input.error {
+    border-color: #f44336; /* Red border for errors */
 }
 
 .wastage-report-form button {
@@ -324,9 +629,8 @@
     font-style: italic;
 }
 
-/* Directions, prediction, and trends sections */
+/* Directions and trends sections (for ReceiverDashboard) */
 .directions-container,
-.prediction-container,
 .trends-container {
     background-color: #ffffff;
     padding: 20px;
@@ -337,7 +641,6 @@
 }
 
 .directions-container h3,
-.prediction-container h2,
 .trends-container h2 {
     font-size: 1.4rem;
     color: #333;
@@ -345,7 +648,6 @@
 }
 
 .directions-container p,
-.prediction-container p,
 .trends-container p {
     font-size: 1rem;
     color: #555;
@@ -372,7 +674,7 @@
     transform: translateX(5px);
 }
 
-/* Loading Spinner */
+/* Loading Spinner (for ReceiverDashboard) */
 .loading-spinner {
     text-align: center;
     margin: 20px 0;
@@ -415,17 +717,60 @@
         font-size: 1.4rem;
     }
 
+    .dashboard-container h3 {
+        font-size: 1.2rem;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .logout-button {
+        width: 100%;
+        padding: 12px;
+    }
+
+    .search-container,
+    .location-search-container {
+        padding: 15px;
+    }
+
+    .search-input,
+    .location-search-input {
+        width: 100%; /* Full width on smaller screens */
+        max-width: 300px;
+    }
+
+    .search-form,
+    .location-search-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-button,
+    .clear-button,
+    .location-search-button,
+    .location-clear-button,
+    .use-current-location-button {
+        width: 100%;
+        padding: 12px;
+    }
+
     .dashboard-form,
     .wastage-report-form form,
     .wastage-report-container,
     .directions-container,
-    .prediction-container,
     .trends-container {
         padding: 20px;
     }
 
     #map {
         height: 300px; /* Reduce map height on smaller screens */
+    }
+
+    .donor-map {
+        height: 250px; /* Reduce map height on smaller screens */
     }
 
     .listing-item {
@@ -447,6 +792,33 @@
         font-size: 1.2rem;
     }
 
+    .dashboard-container h3 {
+        font-size: 1rem;
+    }
+
+    .search-input,
+    .location-search-input {
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+
+    .search-button,
+    .clear-button,
+    .location-search-button,
+    .location-clear-button,
+    .use-current-location-button {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    .search-error,
+    .search-info,
+    .location-search-error,
+    .location-search-info,
+    .error-message {
+        font-size: 0.8rem;
+    }
+
     .dashboard-form input,
     .dashboard-form textarea,
     .wastage-report-form input,
@@ -454,6 +826,10 @@
     .wastage-report-form button {
         padding: 10px;
         font-size: 0.9rem;
+    }
+
+    .dashboard-form {
+        padding: 15px;
     }
 
     .listing-item {
