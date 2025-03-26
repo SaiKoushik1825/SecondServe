@@ -11,22 +11,23 @@
 /* Donor Dashboard Background */
 .donor-dashboard {
     /* Background image with a semi-transparent gradient overlay to simulate opacity */
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+    background: linear-gradient(rgba(226, 125, 96, 0.5), rgba(226, 125, 96, 0.5)), 
                 url('https://media.istockphoto.com/id/1498170916/photo/a-couple-is-taking-a-bag-of-food-at-the-food-and-clothes-bank.jpg?s=612x612&w=0&k=20&c=0fnD_g46lvoZ5NdzX5zYOSM4PzM95ezfs5uMe9D1QKs=') no-repeat center center/cover;
-    background-color: #000000; /* Fallback color if image fails to load */
+    background-color: #F5F5DC; /* Fallback color if image fails to load (Beige) */
 }
 
 /* Receiver Dashboard Background */
 .receiver-dashboard {
     /* Background image with a semi-transparent gradient overlay to simulate opacity */
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+    background: linear-gradient(rgba(226, 125, 96, 0.5), rgba(226, 125, 96, 0.5)), 
                 url('https://media.istockphoto.com/id/1433432507/photo/healthy-eating-plate-with-vegan-or-vegetarian-food-in-woman-hands-healthy-plant-based-diet.jpg?s=612x612&w=0&k=20&c=kQBPg4xNIiDMZ-Uu2r37OHZDQSaRroZlxo_YLioh5tA=') no-repeat center center/cover;
-    background-color: #000000; /* Fallback color if image fails to load */
+    background-color: #F5F5DC; /* Fallback color if image fails to load (Beige) */
 }
+
 /* Headings */
 .dashboard-container h1 {
     font-size: 2.2rem;
-    color: #ffffff; /* White text on green background */
+    color: #ffffff; /* White text on background */
     margin-bottom: 15px;
     font-weight: 600;
 }
@@ -71,7 +72,7 @@
 
 .listing-item button {
     padding: 10px 20px;
-    background-color: #4CAF50; /* Green button to match theme */
+    background-color: #E27D60; /* Terracotta button to match theme */
     color: #ffffff;
     border: none;
     border-radius: 5px;
@@ -81,12 +82,12 @@
 }
 
 .listing-item button:hover {
-    background-color: #000000; /* Darker green on hover */
+    background-color: #F4A261; /* Soft Orange on hover */
     transform: scale(1.02);
 }
 
 .listing-item button:focus {
-    outline: 3px solid #000000; /* Focus outline for accessibility */
+    outline: 3px solid #F5F5DC; /* Beige outline for accessibility */
     outline-offset: 2px;
 }
 
@@ -126,13 +127,13 @@
 
 .dashboard-form input:focus,
 .dashboard-form textarea:focus {
-    border-color: #000000;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    border-color: #E27D60; /* Terracotta border on focus */
+    box-shadow: 0 0 5px rgba(226, 125, 96, 0.3);
 }
 
 .dashboard-form button {
     padding: 14px;
-    background-color: #000000;
+    background-color: #E27D60; /* Terracotta button */
     color: #ffffff;
     border: none;
     border-radius: 6px;
@@ -143,12 +144,12 @@
 }
 
 .dashboard-form button:hover {
-    background-color: #000000;
+    background-color: #F4A261; /* Soft Orange on hover */
     transform: scale(1.02);
 }
 
 .dashboard-form button:focus {
-    outline: 3px solid #000000;
+    outline: 3px solid #F5F5DC; /* Beige outline for accessibility */
     outline-offset: 2px;
 }
 
@@ -175,7 +176,7 @@
 
 /* User's location marker */
 .user-location-marker {
-    background-color: #1976D2; /* Blue for user location */
+    background-color: #1976D2; /* Blue for user location (unchanged) */
     width: 16px;
     height: 16px;
     border-radius: 50%;
@@ -207,7 +208,7 @@
 .leaflet-popup-content button {
     margin-top: 8px;
     padding: 8px 12px;
-    background-color: #000000;
+    background-color: #E27D60; /* Terracotta button */
     color: #ffffff;
     border: none;
     border-radius: 4px;
@@ -216,11 +217,11 @@
 }
 
 .leaflet-popup-content button:hover {
-    background-color: #000000;
+    background-color: #F4A261; /* Soft Orange on hover */
 }
 
 .leaflet-popup-content button:focus {
-    outline: 3px solid #000000;
+    outline: 3px solid #F5F5DC; /* Beige outline for accessibility */
     outline-offset: 2px;
 }
 
@@ -257,13 +258,13 @@
 }
 
 .wastage-report-form input:focus {
-    border-color: #000000;
-    box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+    border-color: #E27D60; /* Terracotta border on focus */
+    box-shadow: 0 0 5px rgba(226, 125, 96, 0.3);
 }
 
 .wastage-report-form button {
     padding: 12px;
-    background-color: #000000;
+    background-color: #E27D60; /* Terracotta button */
     color: #ffffff;
     border: none;
     border-radius: 6px;
@@ -273,12 +274,12 @@
 }
 
 .wastage-report-form button:hover {
-    background-color: #000000;
+    background-color: #F4A261; /* Soft Orange on hover */
     transform: scale(1.02);
 }
 
 .wastage-report-form button:focus {
-    outline: 3px solid #000000;
+    outline: 3px solid #F5F5DC; /* Beige outline for accessibility */
     outline-offset: 2px;
 }
 
