@@ -12,31 +12,31 @@
 /* Page Backgrounds */
 .signup-page {
     /* Background image with a semi-transparent gradient overlay to simulate opacity */
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+    background: linear-gradient(rgba(226, 125, 96, 0.5), rgba(226, 125, 96, 0.5)), 
                 url('https://thumbs.dreamstime.com/b/traditional-south-indian-food-platter-rice-other-variety-items-served-banana-leaf-festival-occasion-270227163.jpg') no-repeat center center/cover;
-    background-color: #000000; /* Fallback color if image fails to load */
+    background-color: #F5F5DC; /* Fallback color if image fails to load (Beige) */
 }
 
 .login-page {
     /* Background image with a semi-transparent gradient overlay to simulate opacity */
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+    background: linear-gradient(rgba(226, 125, 96, 0.5), rgba(226, 125, 96, 0.5)), 
                 url('https://thumbs.dreamstime.com/b/traditional-south-indian-food-platter-rice-other-variety-items-served-banana-leaf-festival-occasion-270227163.jpg') no-repeat center center/cover;
-    background-color: #000000; /* Fallback color if image fails to load */
+    background-color: #F5F5DC; /* Fallback color if image fails to load (Beige) */
 }
 
 .role-selection-page {
     /* Background image with a semi-transparent gradient overlay to simulate opacity */
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+    background: linear-gradient(rgba(226, 125, 96, 0.5), rgba(226, 125, 96, 0.5)), 
                 url('https://www.foodinfotech.com/wp-content/uploads/2023/08/Untitled-design-10.jpg') no-repeat center center/cover;
-    background-color: #000000; /* Fallback color if image fails to load */
+    background-color: #F5F5DC; /* Fallback color if image fails to load (Beige) */
 }
 
 .forgot-password-page {
-    background: linear-gradient(135deg, #000000 0%, #000000 100%); /* Darker green gradient */
+    background: linear-gradient(135deg, #E27D60 0%, #F4A261 100%); /* Terracotta to Soft Orange gradient */
 }
 
 .reset-password-page {
-    background: linear-gradient(135deg, #000000 0%, #000000 100%); /* Lighter green gradient */
+    background: linear-gradient(135deg, #F4A261 0%, #F5F5DC 100%); /* Soft Orange to Beige gradient */
 }
 
 /* Form styling */
@@ -60,7 +60,7 @@
 /* Form heading */
 .auth-form h1 {
     font-size: 2rem; /* Larger heading */
-    color: #000000; /* Dark green for heading */
+    color: #E27D60; /* Terracotta for heading */
     text-align: center;
     margin-bottom: 10px;
     font-weight: 600;
@@ -69,7 +69,7 @@
 /* Form heading (h2 used in ForgotPassword.js) */
 .auth-form h2 {
     font-size: 1.8rem; /* Slightly smaller than h1 */
-    color: #000000; /* Dark green for heading */
+    color: #E27D60; /* Terracotta for heading */
     text-align: center;
     margin-bottom: 10px;
     font-weight: 600;
@@ -116,8 +116,8 @@
 
 /* Focus state for inputs */
 .auth-form input:focus {
-    border-color: #000000; /* Green border on focus */
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    border-color: #E27D60; /* Terracotta border on focus */
+    box-shadow: 0 0 5px rgba(226, 125, 96, 0.3);
 }
 
 /* Specific styling for OTP input (used in ForgotPassword.js) */
@@ -142,7 +142,7 @@
 
 /* Success message (e.g., for ForgotPassword) */
 .success {
-    color: #000000;
+    color: #E27D60; /* Terracotta for success message */
     font-size: 1.1rem;
     text-align: center;
     margin: 10px 0;
@@ -151,7 +151,7 @@
 /* Form buttons (e.g., Submit, Continue) */
 .auth-form button[type="submit"] {
     padding: 14px;
-    background-color: #000000; /* Green button */
+    background-color: #E27D60; /* Terracotta button */
     color: #ffffff;
     border: none;
     border-radius: 6px;
@@ -162,12 +162,12 @@
 }
 
 .auth-form button[type="submit"]:hover {
-    background-color: #000000; /* Darker green on hover */
+    background-color: #F4A261; /* Soft Orange on hover */
     transform: scale(1.02); /* Subtle scale effect */
 }
 
 .auth-form button[type="submit"]:focus {
-    outline: 3px solid #000000; /* Focus outline for accessibility */
+    outline: 3px solid #F5F5DC; /* Beige outline for accessibility */
     outline-offset: 2px;
 }
 
@@ -203,14 +203,14 @@
 }
 
 .role-buttons button:focus {
-    outline: 3px solid #000000; /* Focus outline for accessibility */
+    outline: 3px solid #F5F5DC; /* Beige outline for accessibility */
     outline-offset: 2px;
 }
 
 .role-buttons button.selected {
-    background-color: #000000; /* Green background when selected */
+    background-color: #E27D60; /* Terracotta background when selected */
     color: #ffffff;
-    border-color: #000000;
+    border-color: #E27D60;
 }
 
 .role-buttons button:disabled {
@@ -222,7 +222,7 @@
 /* Links (e.g., "Forgot Password?", "Back to Login", "Signup here") */
 .auth-form a,
 .auth-form .link-button {
-    color: #000000; /* Green links */
+    color: #E27D60; /* Terracotta links */
     text-decoration: underline;
     font-weight: 500;
     transition: color 0.3s;
@@ -234,12 +234,12 @@
 
 .auth-form a:hover,
 .auth-form .link-button:hover {
-    color: #000000; /* Darker green on hover */
+    color: #F4A261; /* Soft Orange on hover */
 }
 
 .auth-form a:focus,
 .auth-form .link-button:focus {
-    outline: 2px solid #000000; /* Focus outline for accessibility */
+    outline: 2px solid #F5F5DC; /* Beige outline for accessibility */
     outline-offset: 2px;
     border-radius: 3px;
 }
