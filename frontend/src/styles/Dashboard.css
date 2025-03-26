@@ -11,31 +11,33 @@
 /* Donor Dashboard Background */
 .donor-dashboard {
     /* Background image with a semi-transparent gradient overlay to simulate opacity */
-    background: linear-gradient(rgba(46, 125, 50, 0.5), rgba(46, 125, 50, 0.5)), 
+    background: linear-gradient(rgba(33, 33, 33, 0.5), rgba(33, 33, 33, 0.5)), 
                 url('https://media.istockphoto.com/id/1498170916/photo/a-couple-is-taking-a-bag-of-food-at-the-food-and-clothes-bank.jpg?s=612x612&w=0&k=20&c=0fnD_g46lvoZ5NdzX5zYOSM4PzM95ezfs5uMe9D1QKs=') no-repeat center center/cover;
-    background-color: #E8F5E9; /* Fallback color if image fails to load (Light Green) */
+    background-color: #303030; /* Fallback color (Dark Grey) */
 }
 
 /* Receiver Dashboard Background */
 .receiver-dashboard {
     /* Background image with a semi-transparent gradient overlay to simulate opacity */
-    background: linear-gradient(rgba(46, 125, 50, 0.5), rgba(46, 125, 50, 0.5)), 
+    background: linear-gradient(rgba(33, 33, 33, 0.6), rgba(33, 33, 33, 0.6)), 
                 url('https://media.istockphoto.com/id/1433432507/photo/healthy-eating-plate-with-vegan-or-vegetarian-food-in-woman-hands-healthy-plant-based-diet.jpg?s=612x612&w=0&k=20&c=kQBPg4xNIiDMZ-Uu2r37OHZDQSaRroZlxo_YLioh5tA=') no-repeat center center/cover;
-    background-color: #E8F5E9; /* Fallback color if image fails to load (Light Green) */
+    background-color: #303030; /* Fallback color (Dark Grey) */
 }
 
 /* Headings */
 .dashboard-container h1 {
     font-size: 2.2rem;
-    color: #ffffff; /* White text on background */
+    color: #FFFFFF; /* White text on background */
     margin-bottom: 15px;
     font-weight: 600;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Improve readability on background */
 }
 
 .dashboard-container h2 {
     font-size: 1.6rem;
-    color: #ffffff;
+    color: #FFFFFF; /* White text */
     margin-bottom: 25px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Improve readability on background */
 }
 
 .dashboard-container h3 {
@@ -48,15 +50,22 @@
 .listings-list {
     list-style: none;
     padding: 0;
+    margin: 20px 0;
 }
 
 .listing-item {
-    background-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.95);
     padding: 20px;
     margin-bottom: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     text-align: left;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.listing-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .listing-item h3 {
@@ -72,22 +81,23 @@
 
 .listing-item button {
     padding: 10px 20px;
-    background-color: #FF7043; /* Bright Orange button to match theme */
-    color: #ffffff; /* White text */
+    background-color: #42A5F5; /* Blue button to match theme */
+    color: #FFFFFF; /* White text */
     border: none;
     border-radius: 5px;
     font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.1s;
+    margin-right: 10px;
 }
 
 .listing-item button:hover {
-    background-color: #F4511E; /* Darker Orange on hover */
+    background-color: #2196F3; /* Darker blue on hover */
     transform: scale(1.02);
 }
 
 .listing-item button:focus {
-    outline: 3px solid #FFAB91; /* Light Orange outline for accessibility */
+    outline: 3px solid #64B5F6; /* Lighter blue for focus outline */
     outline-offset: 2px;
 }
 
@@ -127,14 +137,14 @@
 
 .dashboard-form input:focus,
 .dashboard-form textarea:focus {
-    border-color: #FF7043; /* Bright Orange border on focus */
-    box-shadow: 0 0 5px rgba(255, 112, 67, 0.3);
+    border-color: #42A5F5; /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(66, 165, 245, 0.3);
 }
 
 .dashboard-form button {
     padding: 14px;
-    background-color: #FF7043; /* Bright Orange button */
-    color: #ffffff; /* White text */
+    background-color: #42A5F5; /* Blue button */
+    color: #FFFFFF; /* White text */
     border: none;
     border-radius: 6px;
     font-size: 1.1rem;
@@ -144,12 +154,12 @@
 }
 
 .dashboard-form button:hover {
-    background-color: #F4511E; /* Darker Orange on hover */
+    background-color: #2196F3; /* Darker blue on hover */
     transform: scale(1.02);
 }
 
 .dashboard-form button:focus {
-    outline: 3px solid #FFAB91; /* Light Orange outline for accessibility */
+    outline: 3px solid #64B5F6; /* Lighter blue for focus outline */
     outline-offset: 2px;
 }
 
@@ -176,7 +186,7 @@
 
 /* User's location marker */
 .user-location-marker {
-    background-color: #1976D2; /* Blue for user location (unchanged) */
+    background-color: #1976D2; /* Blue for user location */
     width: 16px;
     height: 16px;
     border-radius: 50%;
@@ -206,23 +216,30 @@
 }
 
 .leaflet-popup-content button {
-    margin-top: 8px;
+    margin: 8px 5px 0 0;
     padding: 8px 12px;
-    background-color: #FF7043; /* Bright Orange button */
-    color: #ffffff; /* White text */
+    background-color: #42A5F5; /* Blue button */
+    color: #FFFFFF; /* White text */
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s, transform 0.1s;
 }
 
 .leaflet-popup-content button:hover {
-    background-color: #F4511E; /* Darker Orange on hover */
+    background-color: #2196F3; /* Darker blue on hover */
+    transform: scale(1.02);
 }
 
 .leaflet-popup-content button:focus {
-    outline: 3px solid #FFAB91; /* Light Orange outline for accessibility */
+    outline: 3px solid #64B5F6; /* Lighter blue for focus outline */
     outline-offset: 2px;
+}
+
+.leaflet-popup-content button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
 }
 
 /* Wastage report form and container */
@@ -233,7 +250,7 @@
 .wastage-report-form h2 {
     font-size: 1.6rem;
     margin-bottom: 15px;
-    color: #ffffff;
+    color: #FFFFFF; /* White text */
 }
 
 .wastage-report-form form {
@@ -246,7 +263,7 @@
 
 .wastage-report-form label {
     font-weight: 600;
-    color: #ffffff;
+    color: #FFFFFF; /* White text */
 }
 
 .wastage-report-form input {
@@ -258,14 +275,14 @@
 }
 
 .wastage-report-form input:focus {
-    border-color: #FF7043; /* Bright Orange border on focus */
-    box-shadow: 0 0 5px rgba(255, 112, 67, 0.3);
+    border-color: #42A5F5; /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(66, 165, 245, 0.3);
 }
 
 .wastage-report-form button {
     padding: 12px;
-    background-color: #FF7043; /* Bright Orange button */
-    color: #ffffff; /* White text */
+    background-color: #42A5F5; /* Blue button */
+    color: #FFFFFF; /* White text */
     border: none;
     border-radius: 6px;
     font-size: 1rem;
@@ -274,12 +291,12 @@
 }
 
 .wastage-report-form button:hover {
-    background-color: #F4511E; /* Darker Orange on hover */
+    background-color: #2196F3; /* Darker blue on hover */
     transform: scale(1.02);
 }
 
 .wastage-report-form button:focus {
-    outline: 3px solid #FFAB91; /* Light Orange outline for accessibility */
+    outline: 3px solid #64B5F6; /* Lighter blue for focus outline */
     outline-offset: 2px;
 }
 
@@ -344,6 +361,43 @@
     font-size: 1rem;
     color: #333;
     margin: 8px 0;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.trends-container li:hover {
+    background-color: #e0f7fa;
+    transform: translateX(5px);
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    text-align: center;
+    margin: 20px 0;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in forwards;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #42A5F5;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 10px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
 }
 
 /* Responsive design */
@@ -373,6 +427,15 @@
     #map {
         height: 300px; /* Reduce map height on smaller screens */
     }
+
+    .listing-item {
+        padding: 15px;
+    }
+
+    .listing-item button {
+        width: 100%;
+        margin: 5px 0;
+    }
 }
 
 @media (max-width: 480px) {
@@ -394,6 +457,23 @@
     }
 
     .listing-item {
-        padding: 15px;
+        padding: 10px;
+    }
+
+    .leaflet-popup-content {
+        margin: 8px;
+    }
+
+    .leaflet-popup-content h4 {
+        font-size: 1rem;
+    }
+
+    .leaflet-popup-content p {
+        font-size: 0.9rem;
+    }
+
+    .leaflet-popup-content button {
+        padding: 6px 10px;
+        font-size: 0.9rem;
     }
 }

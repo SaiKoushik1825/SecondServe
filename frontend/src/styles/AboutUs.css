@@ -1,0 +1,194 @@
+/* Base container for the about page */
+.about-container {
+    background: linear-gradient(135deg, #212121 0%, #303030 100%); /* Charcoal Black to Dark Grey gradient */
+    min-height: 100vh; /* Ensure the background covers the entire viewport height */
+    color: #FFFFFF; /* White text for readability */
+    font-family: 'Arial', sans-serif; /* Professional font */
+}
+
+/* About Section */
+.about-section {
+    padding: 60px 20px;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.about-section h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #FFFFFF; /* White text */
+}
+
+.about-section p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    color: #E0E0E0; /* Light grey for description */
+}
+
+.mission-vision h2 {
+    font-size: 1.8rem;
+    margin: 20px 0 10px;
+    color: #FFFFFF; /* White text */
+}
+
+.mission-vision p {
+    font-size: 1rem;
+    color: #E0E0E0; /* Light grey text */
+}
+
+/* Team Section */
+.team-section {
+    padding: 60px 20px;
+    background-color: #424242; /* Slightly lighter grey for contrast */
+    text-align: center;
+}
+
+.team-section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+    color: #FFFFFF; /* White text */
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.team-card {
+    background-color: #303030; /* Dark Grey background for cards */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s, box-shadow 0.3s;
+    animation: fadeInUp 1s ease-in-out;
+}
+
+.team-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.team-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #FFFFFF; /* White text */
+}
+
+.team-card .role {
+    font-size: 1.1rem;
+    font-style: italic;
+    margin-bottom: 10px;
+    color: #42A5F5; /* Blue for role */
+}
+
+.team-card p {
+    font-size: 1rem;
+    color: #E0E0E0; /* Light grey for description */
+}
+
+/* Footer Section */
+.footer-section {
+    padding: 20px;
+    background-color: #212121; /* Charcoal Black background */
+    text-align: center;
+}
+
+.footer-section p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #E0E0E0; /* Light grey text */
+}
+
+.footer-links {
+    margin-top: 10px;
+}
+
+.footer-links a {
+    color: #42A5F5; /* Blue links */
+    text-decoration: none;
+    margin: 0 10px;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+}
+
+.footer-links a:hover {
+    color: #2196F3; /* Darker blue on hover */
+}
+
+.footer-links a:focus {
+    outline: 2px solid #64B5F6; /* Lighter blue for focus outline */
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .about-section h1,
+    .team-section h2 {
+        font-size: 2rem;
+    }
+
+    .about-section p {
+        font-size: 1.1rem;
+    }
+
+    .mission-vision h2 {
+        font-size: 1.5rem;
+    }
+
+    .team-card {
+        padding: 20px;
+    }
+
+    .team-card h3 {
+        font-size: 1.3rem;
+    }
+
+    .team-card .role {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .about-section h1,
+    .team-section h2 {
+        font-size: 1.8rem;
+    }
+
+    .about-section p {
+        font-size: 1rem;
+    }
+
+    .mission-vision h2 {
+        font-size: 1.3rem;
+    }
+
+    .team-card h3 {
+        font-size: 1.2rem;
+    }
+
+    .team-card .role {
+        font-size: 0.9rem;
+    }
+
+    .team-card p {
+        font-size: 0.9rem;
+    }
+}

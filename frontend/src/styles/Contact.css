@@ -1,0 +1,213 @@
+/* Base container for the contact page */
+.contact-container {
+    background: linear-gradient(135deg, #212121 0%, #303030 100%); /* Charcoal Black to Dark Grey gradient */
+    min-height: 100vh; /* Ensure the background covers the entire viewport height */
+    color: #FFFFFF; /* White text for readability */
+    font-family: 'Arial', sans-serif; /* Professional font */
+}
+
+/* Contact Section */
+.contact-section {
+    padding: 60px 20px;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.contact-section h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #FFFFFF; /* White text */
+}
+
+.contact-section p {
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+    color: #E0E0E0; /* Light grey for description */
+}
+
+/* Contact Form */
+.contact-form {
+    background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white background */
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 40px;
+    animation: fadeIn 1s ease-in-out;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+}
+
+.contact-form label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.contact-form input,
+.contact-form textarea {
+    padding: 14px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.contact-form textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    border-color: #42A5F5; /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(66, 165, 245, 0.3);
+}
+
+.contact-form input::placeholder,
+.contact-form textarea::placeholder {
+    color: #999;
+    font-style: italic;
+}
+
+.contact-form button {
+    padding: 14px;
+    background-color: #42A5F5; /* Blue button */
+    color: #FFFFFF; /* White text */
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.contact-form button:hover {
+    background-color: #2196F3; /* Darker blue on hover */
+    transform: scale(1.02);
+}
+
+.contact-form button:focus {
+    outline: 3px solid #64B5F6; /* Lighter blue for focus outline */
+    outline-offset: 2px;
+}
+
+/* Contact Info */
+.contact-info {
+    margin-top: 40px;
+}
+
+.contact-info h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: #FFFFFF; /* White text */
+}
+
+.contact-info p {
+    font-size: 1rem;
+    margin: 10px 0;
+    color: #E0E0E0; /* Light grey text */
+}
+
+/* Footer Section */
+.footer-section {
+    padding: 20px;
+    background-color: #212121; /* Charcoal Black background */
+    text-align: center;
+}
+
+.footer-section p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #E0E0E0; /* Light grey text */
+}
+
+.footer-links {
+    margin-top: 10px;
+}
+
+.footer-links a {
+    color: #42A5F5; /* Blue links */
+    text-decoration: none;
+    margin: 0 10px;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+}
+
+.footer-links a:hover {
+    color: #2196F3; /* Darker blue on hover */
+}
+
+.footer-links a:focus {
+    outline: 2px solid #64B5F6; /* Lighter blue for focus outline */
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .contact-section h1 {
+        font-size: 2rem;
+    }
+
+    .contact-section p {
+        font-size: 1.1rem;
+    }
+
+    .contact-form {
+        padding: 30px;
+    }
+
+    .contact-info h2 {
+        font-size: 1.5rem;
+    }
+
+    .contact-info p {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .contact-section h1 {
+        font-size: 1.8rem;
+    }
+
+    .contact-section p {
+        font-size: 1rem;
+    }
+
+    .contact-form {
+        padding: 20px;
+    }
+
+    .contact-form input,
+    .contact-form textarea,
+    .contact-form button {
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+
+    .contact-info h2 {
+        font-size: 1.3rem;
+    }
+}

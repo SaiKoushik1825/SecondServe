@@ -1,33 +1,283 @@
+/* Base container for the home page */
 .home-container {
-    /* background-image: url('../assets/images/home-bg.jpg'); */
-    background-color: #FF9800; /* Fallback color: orange for a warm, welcoming feel */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    background: linear-gradient(135deg, #212121 0%, #303030 100%); /* Charcoal Black to Dark Grey gradient */
     min-height: 100vh; /* Ensure the background covers the entire viewport height */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white; /* Ensure text is readable on the background */
-    text-align: center;
-    position: relative; /* For overlay */
+    color: #FFFFFF; /* White text for readability */
+    font-family: 'Arial', sans-serif; /* Professional font */
 }
 
-/* Remove the overlay since we're not using a background image */
-/*.home-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1;
-}*/
+/* Hero Section */
+.hero-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh; /* Take up most of the viewport height */
+    text-align: center;
+    padding: 40px 20px;
+}
 
-/* Ensure content is above the overlay (not needed anymore) */
-.home-container > * {
-    position: relative;
-    z-index: 2;
+.hero-content {
+    max-width: 800px;
+    animation: fadeIn 1s ease-in-out; /* Fade-in animation */
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #FFFFFF; /* White text */
+}
+
+.hero-content p {
+    font-size: 1.3rem;
+    margin-bottom: 30px;
+    color: #E0E0E0; /* Light grey for subheading */
+}
+
+.hero-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.hero-button {
+    padding: 14px 30px;
+    background-color: #42A5F5; /* Blue button */
+    color: #FFFFFF; /* White text */
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.hero-button:hover {
+    background-color: #2196F3; /* Darker blue on hover */
+    transform: scale(1.05);
+}
+
+.hero-button:focus {
+    outline: 3px solid #64B5F6; /* Lighter blue for focus outline */
+    outline-offset: 2px;
+}
+
+/* Features Section */
+.features-section {
+    padding: 60px 20px;
+    background-color: #424242; /* Slightly lighter grey for contrast */
+    text-align: center;
+}
+
+.features-section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+    color: #FFFFFF; /* White text */
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.feature-card {
+    background-color: #303030; /* Dark Grey background for cards */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s, box-shadow 0.3s;
+    animation: fadeInUp 1s ease-in-out;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.feature-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.feature-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: #FFFFFF; /* White text */
+}
+
+.feature-card p {
+    font-size: 1rem;
+    color: #E0E0E0; /* Light grey for description */
+}
+
+/* Call-to-Action Section */
+.cta-section {
+    padding: 60px 20px;
+    background-color: #1976D2; /* Deeper blue for Second Serve branding */
+    text-align: center;
+}
+
+.cta-section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: #FFFFFF; /* White text */
+}
+
+.cta-section p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    color: #E0E0E0; /* Light grey for description */
+}
+
+.cta-button {
+    padding: 16px 40px;
+    background-color: #303030; /* Dark Grey button */
+    color: #FFFFFF; /* White text */
+    border: none;
+    border-radius: 6px;
+    font-size: 1.2rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.cta-button:hover {
+    background-color: #212121; /* Charcoal Black on hover */
+    transform: scale(1.05);
+}
+
+.cta-button:focus {
+    outline: 3px solid #64B5F6; /* Lighter blue for focus outline */
+    outline-offset: 2px;
+}
+
+/* Footer Section */
+.footer-section {
+    padding: 20px;
+    background-color: #212121; /* Charcoal Black background */
+    text-align: center;
+}
+
+.footer-section p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #E0E0E0; /* Light grey text */
+}
+
+.footer-links {
+    margin-top: 10px;
+}
+
+.footer-links a {
+    color: #42A5F5; /* Blue links */
+    text-decoration: none;
+    margin: 0 10px;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+}
+
+.footer-links a:hover {
+    color: #2196F3; /* Darker blue on hover */
+}
+
+.footer-links a:focus {
+    outline: 2px solid #64B5F6; /* Lighter blue for focus outline */
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-content h1 {
+        font-size: 2.2rem;
+    }
+
+    .hero-content p {
+        font-size: 1.1rem;
+    }
+
+    .hero-button {
+        padding: 12px 25px;
+        font-size: 1rem;
+    }
+
+    .features-section h2,
+    .cta-section h2 {
+        font-size: 2rem;
+    }
+
+    .feature-card {
+        padding: 20px;
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+    }
+
+    .feature-card h3 {
+        font-size: 1.3rem;
+    }
+
+    .cta-button {
+        padding: 14px 30px;
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-content h1 {
+        font-size: 1.8rem;
+    }
+
+    .hero-content p {
+        font-size: 1rem;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .hero-button {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+
+    .features-section h2,
+    .cta-section h2 {
+        font-size: 1.8rem;
+    }
+
+    .cta-section p {
+        font-size: 1rem;
+    }
+
+    .cta-button {
+        padding: 12px 25px;
+        font-size: 1rem;
+    }
 }

@@ -46,15 +46,25 @@ function ReceiverDashboard() {
     const markersRef = useRef([]);
     const routeLayerRef = useRef(null);
 
+    // Check authentication on mount
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Please log in to access the Receiver Dashboard.');
+            navigate('/login');
+        }
+    }, [navigate]);
+
     // Fetch available listings and donation trends on component mount
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const listingsResponse = await axios.get('http://localhost:5000/api/food');
+                const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+                const listingsResponse = await axios.get(`${backendUrl}/api/food`);
                 setListings(listingsResponse.data);
 
-                const trendsResponse = await axios.get('http://localhost:5000/api/food/donation-trends');
+                const trendsResponse = await axios.get(`${backendUrl}/api/food/donation-trends`);
                 setTrends(trendsResponse.data.trends);
             } catch (err) {
                 console.error('Fetch data error:', err);
@@ -205,8 +215,9 @@ function ReceiverDashboard() {
                 navigate('/login');
                 return;
             }
+            const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
             const response = await axios.put(
-                `http://localhost:5000/api/food/claim/${listingId}`,
+                `${backendUrl}/api/food/claim/${listingId}`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -230,8 +241,9 @@ function ReceiverDashboard() {
                 navigate('/login');
                 return;
             }
+            const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
             await axios.put(
-                `http://localhost:5000/api/food/confirm-receipt/${listingId}`,
+                `${backendUrl}/api/food/confirm-receipt/${listingId}`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -294,12 +306,49 @@ function ReceiverDashboard() {
         <div className="dashboard-container receiver-dashboard">
             <h1>Receiver Dashboard</h1>
             {loading ? (
-                <p>Loading listings...</p>
+                <div className="loading-spinner">
+                    <p>Loading listings...</p>
+                    <div className="spinner"></div>
+                </div>
             ) : (
                 <>
                     <h2>Available Food Listings (Nearest First)</h2>
-                    <div id="map"></div>
+                    <div id="map" style={{ height: '400px', marginBottom: '20px' }}></div>
 
+                    {/* Listings List */}
+                    {sortedListings.length > 0 ? (
+                        <ul className="listings-list">
+                            {sortedListings.map((listing) => (
+                                <li key={listing._id} className="listing-item">
+                                    <h3>{listing.title}</h3>
+                                    <p>{listing.description}</p>
+                                    <p>Quantity: {listing.quantity} kg</p>
+                                    <p>Location: {listing.location.address}</p>
+                                    <p>Distance: {listing.distance ? listing.distance.toFixed(2) + ' km' : 'Unknown'}</p>
+                                    <p>Posted by: {listing.postedBy.email}</p>
+                                    {listing.status === 'available' && (
+                                        <button onClick={() => handleClaim(listing._id)}>Claim Listing</button>
+                                    )}
+                                    {listing.status === 'claimed' && (
+                                        <button onClick={() => handleConfirmReceipt(listing._id)}>Confirm Receipt</button>
+                                    )}
+                                    {listing.status === 'expired' && (
+                                        <p style={{ color: '#f44336' }}>This listing has expired.</p>
+                                    )}
+                                    <button
+                                        onClick={() => handleShowDirections(listing)}
+                                        disabled={directionsLoading}
+                                    >
+                                        {directionsLoading ? 'Loading Directions...' : 'Show Directions'}
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>No available listings at the moment.</p>
+                    )}
+
+                    {/* Hidden buttons for Leaflet popups */}
                     {sortedListings.map((listing) => (
                         <div key={listing._id} style={{ display: 'none' }}>
                             <button

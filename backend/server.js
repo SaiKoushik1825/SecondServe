@@ -19,6 +19,7 @@ app.use(cors({
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/food', require('./routes/food'));
 app.use('/api/visits', require('./routes/visits'));
+app.use('/api/Contact', require('./routes/Contact')); // Add the contact route
 
 // Root route (optional, for debugging)
 app.get('/', (req, res) => {
