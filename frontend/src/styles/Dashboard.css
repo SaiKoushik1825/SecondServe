@@ -1,0 +1,398 @@
+/* Base container for dashboards */
+.dashboard-container {
+    max-width: 900px; /* Slightly increased for better layout */
+    margin: 0 auto;
+    padding: 30px;
+    text-align: center;
+    min-height: 100vh; /* Ensure the background covers the entire viewport height */
+    box-sizing: border-box;
+}
+
+/* Donor Dashboard Background */
+.donor-dashboard {
+    /* Background image with a semi-transparent gradient overlay to simulate opacity */
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                url('https://media.istockphoto.com/id/1498170916/photo/a-couple-is-taking-a-bag-of-food-at-the-food-and-clothes-bank.jpg?s=612x612&w=0&k=20&c=0fnD_g46lvoZ5NdzX5zYOSM4PzM95ezfs5uMe9D1QKs=') no-repeat center center/cover;
+    background-color: #000000; /* Fallback color if image fails to load */
+}
+
+/* Receiver Dashboard Background */
+.receiver-dashboard {
+    /* Background image with a semi-transparent gradient overlay to simulate opacity */
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                url('https://media.istockphoto.com/id/1433432507/photo/healthy-eating-plate-with-vegan-or-vegetarian-food-in-woman-hands-healthy-plant-based-diet.jpg?s=612x612&w=0&k=20&c=kQBPg4xNIiDMZ-Uu2r37OHZDQSaRroZlxo_YLioh5tA=') no-repeat center center/cover;
+    background-color: #000000; /* Fallback color if image fails to load */
+}
+/* Headings */
+.dashboard-container h1 {
+    font-size: 2.2rem;
+    color: #ffffff; /* White text on green background */
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.dashboard-container h2 {
+    font-size: 1.6rem;
+    color: #ffffff;
+    margin-bottom: 25px;
+}
+
+.dashboard-container h3 {
+    font-size: 1.4rem;
+    color: #333; /* Darker color for contrast on white backgrounds */
+    margin-bottom: 15px;
+}
+
+/* Listings in ReceiverDashboard */
+.listings-list {
+    list-style: none;
+    padding: 0;
+}
+
+.listing-item {
+    background-color: #ffffff;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+.listing-item h3 {
+    margin: 0 0 10px;
+    font-size: 1.3rem;
+    color: #333;
+}
+
+.listing-item p {
+    margin: 5px 0;
+    color: #555;
+}
+
+.listing-item button {
+    padding: 10px 20px;
+    background-color: #4CAF50; /* Green button to match theme */
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.listing-item button:hover {
+    background-color: #000000; /* Darker green on hover */
+    transform: scale(1.02);
+}
+
+.listing-item button:focus {
+    outline: 3px solid #000000; /* Focus outline for accessibility */
+    outline-offset: 2px;
+}
+
+/* Form styling (used in DonorDashboard) */
+.dashboard-form {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.dashboard-form label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+    text-align: left;
+    color: #333;
+}
+
+.dashboard-form input,
+.dashboard-form textarea {
+    padding: 14px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.dashboard-form textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.dashboard-form input:focus,
+.dashboard-form textarea:focus {
+    border-color: #000000;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.dashboard-form button {
+    padding: 14px;
+    background-color: #000000;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.dashboard-form button:hover {
+    background-color: #000000;
+    transform: scale(1.02);
+}
+
+.dashboard-form button:focus {
+    outline: 3px solid #000000;
+    outline-offset: 2px;
+}
+
+.dashboard-form button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Map styling */
+#map {
+    width: 100%;
+    height: 400px;
+    margin-bottom: 25px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+}
+
+#map:hover {
+    transform: scale(1.01); /* Subtle scale effect on hover */
+}
+
+/* User's location marker */
+.user-location-marker {
+    background-color: #1976D2; /* Blue for user location */
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Leaflet popup styling */
+.leaflet-popup-content-wrapper {
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.98);
+}
+
+.leaflet-popup-content {
+    margin: 12px;
+}
+
+.leaflet-popup-content h4 {
+    margin: 0 0 8px;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.leaflet-popup-content p {
+    margin: 5px 0;
+    color: #555;
+}
+
+.leaflet-popup-content button {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background-color: #000000;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.leaflet-popup-content button:hover {
+    background-color: #000000;
+}
+
+.leaflet-popup-content button:focus {
+    outline: 3px solid #000000;
+    outline-offset: 2px;
+}
+
+/* Wastage report form and container */
+.wastage-report-form {
+    margin-bottom: 30px;
+}
+
+.wastage-report-form h2 {
+    font-size: 1.6rem;
+    margin-bottom: 15px;
+    color: #ffffff;
+}
+
+.wastage-report-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 350px;
+    margin: 0 auto;
+}
+
+.wastage-report-form label {
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.wastage-report-form input {
+    padding: 12px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.wastage-report-form input:focus {
+    border-color: #000000;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+}
+
+.wastage-report-form button {
+    padding: 12px;
+    background-color: #000000;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.wastage-report-form button:hover {
+    background-color: #000000;
+    transform: scale(1.02);
+}
+
+.wastage-report-form button:focus {
+    outline: 3px solid #000000;
+    outline-offset: 2px;
+}
+
+.wastage-report-container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.wastage-report-container h3 {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.wastage-report-container p {
+    margin: 8px 0;
+    color: #555;
+}
+
+.wastage-report-container em {
+    color: #666;
+    font-style: italic;
+}
+
+/* Directions, prediction, and trends sections */
+.directions-container,
+.prediction-container,
+.trends-container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.directions-container h3,
+.prediction-container h2,
+.trends-container h2 {
+    font-size: 1.4rem;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.directions-container p,
+.prediction-container p,
+.trends-container p {
+    font-size: 1rem;
+    color: #555;
+    margin: 8px 0;
+}
+
+.trends-container ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.trends-container li {
+    font-size: 1rem;
+    color: #333;
+    margin: 8px 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .dashboard-container {
+        max-width: 100%;
+        padding: 20px;
+    }
+
+    .dashboard-container h1 {
+        font-size: 1.8rem;
+    }
+
+    .dashboard-container h2 {
+        font-size: 1.4rem;
+    }
+
+    .dashboard-form,
+    .wastage-report-form form,
+    .wastage-report-container,
+    .directions-container,
+    .prediction-container,
+    .trends-container {
+        padding: 20px;
+    }
+
+    #map {
+        height: 300px; /* Reduce map height on smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-container h1 {
+        font-size: 1.5rem;
+    }
+
+    .dashboard-container h2 {
+        font-size: 1.2rem;
+    }
+
+    .dashboard-form input,
+    .dashboard-form textarea,
+    .wastage-report-form input,
+    .listing-item button,
+    .wastage-report-form button {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    .listing-item {
+        padding: 15px;
+    }
+}
