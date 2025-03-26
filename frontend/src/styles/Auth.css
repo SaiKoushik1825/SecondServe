@@ -12,31 +12,31 @@
 /* Page Backgrounds */
 .signup-page {
     /* Background image with a semi-transparent gradient overlay to simulate opacity */
-    background: linear-gradient(rgba(226, 125, 96, 0.5), rgba(226, 125, 96, 0.5)), 
+    background: linear-gradient(rgba(46, 125, 50, 0.5), rgba(46, 125, 50, 0.5)), 
                 url('https://thumbs.dreamstime.com/b/traditional-south-indian-food-platter-rice-other-variety-items-served-banana-leaf-festival-occasion-270227163.jpg') no-repeat center center/cover;
-    background-color: #F5F5DC; /* Fallback color if image fails to load (Beige) */
+    background-color: #E8F5E9; /* Fallback color if image fails to load (Light Green) */
 }
 
 .login-page {
     /* Background image with a semi-transparent gradient overlay to simulate opacity */
-    background: linear-gradient(rgba(226, 125, 96, 0.5), rgba(226, 125, 96, 0.5)), 
+    background: linear-gradient(rgba(46, 125, 50, 0.5), rgba(46, 125, 50, 0.5)), 
                 url('https://thumbs.dreamstime.com/b/traditional-south-indian-food-platter-rice-other-variety-items-served-banana-leaf-festival-occasion-270227163.jpg') no-repeat center center/cover;
-    background-color: #F5F5DC; /* Fallback color if image fails to load (Beige) */
+    background-color: #E8F5E9; /* Fallback color if image fails to load (Light Green) */
 }
 
 .role-selection-page {
     /* Background image with a semi-transparent gradient overlay to simulate opacity */
-    background: linear-gradient(rgba(226, 125, 96, 0.5), rgba(226, 125, 96, 0.5)), 
+    background: linear-gradient(rgba(46, 125, 50, 0.5), rgba(46, 125, 50, 0.5)), 
                 url('https://www.foodinfotech.com/wp-content/uploads/2023/08/Untitled-design-10.jpg') no-repeat center center/cover;
-    background-color: #F5F5DC; /* Fallback color if image fails to load (Beige) */
+    background-color: #E8F5E9; /* Fallback color if image fails to load (Light Green) */
 }
 
 .forgot-password-page {
-    background: linear-gradient(135deg, #E27D60 0%, #F4A261 100%); /* Terracotta to Soft Orange gradient */
+    background: linear-gradient(135deg, #2E7D32 0%, #E8F5E9 100%); /* Dark Green to Light Green gradient */
 }
 
 .reset-password-page {
-    background: linear-gradient(135deg, #F4A261 0%, #F5F5DC 100%); /* Soft Orange to Beige gradient */
+    background: linear-gradient(135deg, #E8F5E9 0%, #F5F5DC 100%); /* Light Green to Soft Beige gradient */
 }
 
 /* Form styling */
@@ -60,7 +60,7 @@
 /* Form heading */
 .auth-form h1 {
     font-size: 2rem; /* Larger heading */
-    color: #E27D60; /* Terracotta for heading */
+    color: #2E7D32; /* Dark Green for heading */
     text-align: center;
     margin-bottom: 10px;
     font-weight: 600;
@@ -69,7 +69,7 @@
 /* Form heading (h2 used in ForgotPassword.js) */
 .auth-form h2 {
     font-size: 1.8rem; /* Slightly smaller than h1 */
-    color: #E27D60; /* Terracotta for heading */
+    color: #2E7D32; /* Dark Green for heading */
     text-align: center;
     margin-bottom: 10px;
     font-weight: 600;
@@ -116,8 +116,8 @@
 
 /* Focus state for inputs */
 .auth-form input:focus {
-    border-color: #E27D60; /* Terracotta border on focus */
-    box-shadow: 0 0 5px rgba(226, 125, 96, 0.3);
+    border-color: #FF7043; /* Bright Orange border on focus */
+    box-shadow: 0 0 5px rgba(255, 112, 67, 0.3);
 }
 
 /* Specific styling for OTP input (used in ForgotPassword.js) */
@@ -129,12 +129,12 @@
 
 /* Error state for inputs */
 .auth-form input.error {
-    border-color: #F44336; /* Red border for errors */
+    border-color: #F44336; /* Red border for errors (unchanged) */
 }
 
 /* Error message */
 .error {
-    color: #F44336;
+    color: #F44336; /* Red for errors (unchanged) */
     font-size: 0.9rem;
     margin-top: 5px;
     text-align: left;
@@ -142,7 +142,7 @@
 
 /* Success message (e.g., for ForgotPassword) */
 .success {
-    color: #E27D60; /* Terracotta for success message */
+    color: #2E7D32; /* Dark Green for success message */
     font-size: 1.1rem;
     text-align: center;
     margin: 10px 0;
@@ -151,8 +151,8 @@
 /* Form buttons (e.g., Submit, Continue) */
 .auth-form button[type="submit"] {
     padding: 14px;
-    background-color: #E27D60; /* Terracotta button */
-    color: #ffffff;
+    background-color: #FF7043; /* Bright Orange button */
+    color: #ffffff; /* White text */
     border: none;
     border-radius: 6px;
     font-size: 1.1rem;
@@ -162,12 +162,12 @@
 }
 
 .auth-form button[type="submit"]:hover {
-    background-color: #F4A261; /* Soft Orange on hover */
+    background-color: #F4511E; /* Darker Orange on hover */
     transform: scale(1.02); /* Subtle scale effect */
 }
 
 .auth-form button[type="submit"]:focus {
-    outline: 3px solid #F5F5DC; /* Beige outline for accessibility */
+    outline: 3px solid #FFAB91; /* Light Orange outline for accessibility */
     outline-offset: 2px;
 }
 
@@ -203,14 +203,14 @@
 }
 
 .role-buttons button:focus {
-    outline: 3px solid #F5F5DC; /* Beige outline for accessibility */
+    outline: 3px solid #FFAB91; /* Light Orange outline for accessibility */
     outline-offset: 2px;
 }
 
 .role-buttons button.selected {
-    background-color: #E27D60; /* Terracotta background when selected */
-    color: #ffffff;
-    border-color: #E27D60;
+    background-color: #FF7043; /* Bright Orange background when selected */
+    color: #ffffff; /* White text */
+    border-color: #FF7043;
 }
 
 .role-buttons button:disabled {
@@ -222,7 +222,7 @@
 /* Links (e.g., "Forgot Password?", "Back to Login", "Signup here") */
 .auth-form a,
 .auth-form .link-button {
-    color: #E27D60; /* Terracotta links */
+    color: #FF7043; /* Bright Orange links */
     text-decoration: underline;
     font-weight: 500;
     transition: color 0.3s;
@@ -234,12 +234,12 @@
 
 .auth-form a:hover,
 .auth-form .link-button:hover {
-    color: #F4A261; /* Soft Orange on hover */
+    color: #F4511E; /* Darker Orange on hover */
 }
 
 .auth-form a:focus,
 .auth-form .link-button:focus {
-    outline: 2px solid #F5F5DC; /* Beige outline for accessibility */
+    outline: 2px solid #FFAB91; /* Light Orange outline for accessibility */
     outline-offset: 2px;
     border-radius: 3px;
 }

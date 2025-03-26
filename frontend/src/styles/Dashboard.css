@@ -11,17 +11,17 @@
 /* Donor Dashboard Background */
 .donor-dashboard {
     /* Background image with a semi-transparent gradient overlay to simulate opacity */
-    background: linear-gradient(rgba(226, 125, 96, 0.5), rgba(226, 125, 96, 0.5)), 
+    background: linear-gradient(rgba(46, 125, 50, 0.5), rgba(46, 125, 50, 0.5)), 
                 url('https://media.istockphoto.com/id/1498170916/photo/a-couple-is-taking-a-bag-of-food-at-the-food-and-clothes-bank.jpg?s=612x612&w=0&k=20&c=0fnD_g46lvoZ5NdzX5zYOSM4PzM95ezfs5uMe9D1QKs=') no-repeat center center/cover;
-    background-color: #F5F5DC; /* Fallback color if image fails to load (Beige) */
+    background-color: #E8F5E9; /* Fallback color if image fails to load (Light Green) */
 }
 
 /* Receiver Dashboard Background */
 .receiver-dashboard {
     /* Background image with a semi-transparent gradient overlay to simulate opacity */
-    background: linear-gradient(rgba(226, 125, 96, 0.5), rgba(226, 125, 96, 0.5)), 
+    background: linear-gradient(rgba(46, 125, 50, 0.5), rgba(46, 125, 50, 0.5)), 
                 url('https://media.istockphoto.com/id/1433432507/photo/healthy-eating-plate-with-vegan-or-vegetarian-food-in-woman-hands-healthy-plant-based-diet.jpg?s=612x612&w=0&k=20&c=kQBPg4xNIiDMZ-Uu2r37OHZDQSaRroZlxo_YLioh5tA=') no-repeat center center/cover;
-    background-color: #F5F5DC; /* Fallback color if image fails to load (Beige) */
+    background-color: #E8F5E9; /* Fallback color if image fails to load (Light Green) */
 }
 
 /* Headings */
@@ -72,8 +72,8 @@
 
 .listing-item button {
     padding: 10px 20px;
-    background-color: #E27D60; /* Terracotta button to match theme */
-    color: #ffffff;
+    background-color: #FF7043; /* Bright Orange button to match theme */
+    color: #ffffff; /* White text */
     border: none;
     border-radius: 5px;
     font-size: 1rem;
@@ -82,12 +82,12 @@
 }
 
 .listing-item button:hover {
-    background-color: #F4A261; /* Soft Orange on hover */
+    background-color: #F4511E; /* Darker Orange on hover */
     transform: scale(1.02);
 }
 
 .listing-item button:focus {
-    outline: 3px solid #F5F5DC; /* Beige outline for accessibility */
+    outline: 3px solid #FFAB91; /* Light Orange outline for accessibility */
     outline-offset: 2px;
 }
 
@@ -127,14 +127,14 @@
 
 .dashboard-form input:focus,
 .dashboard-form textarea:focus {
-    border-color: #E27D60; /* Terracotta border on focus */
-    box-shadow: 0 0 5px rgba(226, 125, 96, 0.3);
+    border-color: #FF7043; /* Bright Orange border on focus */
+    box-shadow: 0 0 5px rgba(255, 112, 67, 0.3);
 }
 
 .dashboard-form button {
     padding: 14px;
-    background-color: #E27D60; /* Terracotta button */
-    color: #ffffff;
+    background-color: #FF7043; /* Bright Orange button */
+    color: #ffffff; /* White text */
     border: none;
     border-radius: 6px;
     font-size: 1.1rem;
@@ -144,12 +144,12 @@
 }
 
 .dashboard-form button:hover {
-    background-color: #F4A261; /* Soft Orange on hover */
+    background-color: #F4511E; /* Darker Orange on hover */
     transform: scale(1.02);
 }
 
 .dashboard-form button:focus {
-    outline: 3px solid #F5F5DC; /* Beige outline for accessibility */
+    outline: 3px solid #FFAB91; /* Light Orange outline for accessibility */
     outline-offset: 2px;
 }
 
@@ -208,8 +208,8 @@
 .leaflet-popup-content button {
     margin-top: 8px;
     padding: 8px 12px;
-    background-color: #E27D60; /* Terracotta button */
-    color: #ffffff;
+    background-color: #FF7043; /* Bright Orange button */
+    color: #ffffff; /* White text */
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -217,11 +217,11 @@
 }
 
 .leaflet-popup-content button:hover {
-    background-color: #F4A261; /* Soft Orange on hover */
+    background-color: #F4511E; /* Darker Orange on hover */
 }
 
 .leaflet-popup-content button:focus {
-    outline: 3px solid #F5F5DC; /* Beige outline for accessibility */
+    outline: 3px solid #FFAB91; /* Light Orange outline for accessibility */
     outline-offset: 2px;
 }
 
@@ -258,14 +258,14 @@
 }
 
 .wastage-report-form input:focus {
-    border-color: #E27D60; /* Terracotta border on focus */
-    box-shadow: 0 0 5px rgba(226, 125, 96, 0.3);
+    border-color: #FF7043; /* Bright Orange border on focus */
+    box-shadow: 0 0 5px rgba(255, 112, 67, 0.3);
 }
 
 .wastage-report-form button {
     padding: 12px;
-    background-color: #E27D60; /* Terracotta button */
-    color: #ffffff;
+    background-color: #FF7043; /* Bright Orange button */
+    color: #ffffff; /* White text */
     border: none;
     border-radius: 6px;
     font-size: 1rem;
@@ -274,12 +274,12 @@
 }
 
 .wastage-report-form button:hover {
-    background-color: #F4A261; /* Soft Orange on hover */
+    background-color: #F4511E; /* Darker Orange on hover */
     transform: scale(1.02);
 }
 
 .wastage-report-form button:focus {
-    outline: 3px solid #F5F5DC; /* Beige outline for accessibility */
+    outline: 3px solid #FFAB91; /* Light Orange outline for accessibility */
     outline-offset: 2px;
 }
 
