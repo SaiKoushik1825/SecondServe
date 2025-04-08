@@ -23,18 +23,68 @@ function DonorDashboard() {
     const [description, setDescription] = useState('');
     const [quantity, setQuantity] = useState('');
     const [location, setLocation] = useState(null);
+    const [expiresIn, setExpiresIn] = useState(''); // Numeric value for expiration
+    const [expiresUnit, setExpiresUnit] = useState('days'); // Unit: 'hours' or 'days'
     const [wastageReport, setWastageReport] = useState(null);
     const [countryInput, setCountryInput] = useState('');
     const [locationSearch, setLocationSearch] = useState('');
     const [locationSearchError, setLocationSearchError] = useState('');
-    const [suggestions, setSuggestions] = useState([]); // State for autocomplete suggestions
-    const [showSuggestions, setShowSuggestions] = useState(false); // Control suggestion dropdown visibility
+    const [suggestions, setSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [errors, setErrors] = useState({ title: '', description: '', quantity: '', country: '' });
+    const [errors, setErrors] = useState({ title: '', description: '', quantity: '', expiresIn: '', country: '', listings: '', location: '' });
+    const [listings, setListings] = useState([]); // Store donor's listings
     const navigate = useNavigate();
     const mapRef = useRef(null);
     const markerRef = useRef(null);
-    const suggestionTimeoutRef = useRef(null); // For debouncing API calls
+    const suggestionTimeoutRef = useRef(null);
+
+    // Fetch donor's listings on mount
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Please log in to access the Donor Dashboard.');
+            navigate('/login');
+            return;
+        }
+
+        const fetchListings = async () => {
+            try {
+                setLoading(true);
+                const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+                const response = await axios.get(`${backendUrl}/api/food/all`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                // Fallback to auth middleware user ID if /api/user fails
+                let userId;
+                try {
+                    const userResponse = await axios.get(`${backendUrl}/api/user`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    userId = userResponse.data._id;
+                } catch (userErr) {
+                    console.warn('Failed to fetch user ID on mount:', userErr.response?.data || userErr.message);
+                    userId = 'fallback-user-id'; // Replace with actual logic or remove if not needed
+                }
+                setListings(response.data.filter(listing => listing.postedBy._id === userId));
+                setErrors(prev => ({ ...prev, listings: '' }));
+            } catch (err) {
+                console.error('Fetch listings error on mount:', {
+                    status: err.response?.status,
+                    data: err.response?.data,
+                    message: err.message,
+                });
+                setErrors(prev => ({
+                    ...prev,
+                    listings: `Failed to fetch listings: ${err.response?.statusText || err.message}. Check server or token.`
+                }));
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchListings();
+    }, [navigate]);
 
     const fetchWastageReport = async (country) => {
         try {
@@ -44,7 +94,8 @@ function DonorDashboard() {
                 navigate('/login');
                 return;
             }
-            const response = await axios.get('http://localhost:5000/api/food/predict-waste', {
+            const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+            const response = await axios.get(`${backendUrl}/api/food/predict-waste`, {
                 params: { country },
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -56,24 +107,29 @@ function DonorDashboard() {
                 navigate('/login');
             } else {
                 console.error('Wastage report fetch error:', err);
-                setErrors({ ...errors, country: err.response?.data?.error || 'Failed to fetch wastage report.' });
+                setErrors(prev => ({
+                    ...prev,
+                    country: err.response?.data?.error || 'Failed to fetch wastage report.'
+                }));
             }
         }
     };
 
     const validateWastageForm = () => {
         let isValid = true;
-        const newErrors = { ...errors, country: '' };
+        setErrors(prev => ({
+            ...prev,
+            country: ''
+        }));
 
         if (!countryInput.trim()) {
-            newErrors.country = 'Please enter a country name.';
+            setErrors(prev => ({ ...prev, country: 'Please enter a country name.' }));
             isValid = false;
         } else if (!/^[A-Za-z\s]+$/.test(countryInput.trim())) {
-            newErrors.country = 'Country name should only contain letters and spaces.';
+            setErrors(prev => ({ ...prev, country: 'Country name should only contain letters and spaces.' }));
             isValid = false;
         }
 
-        setErrors(newErrors);
         return isValid;
     };
 
@@ -83,7 +139,6 @@ function DonorDashboard() {
         fetchWastageReport(countryInput.trim());
     };
 
-    // Fetch suggestions as the user types (debounced)
     const fetchSuggestions = async (query) => {
         if (!query.trim()) {
             setSuggestions([]);
@@ -96,7 +151,7 @@ function DonorDashboard() {
                 params: {
                     q: query,
                     format: 'json',
-                    limit: 5, // Limit to 5 suggestions
+                    limit: 5,
                 },
             });
 
@@ -109,24 +164,20 @@ function DonorDashboard() {
         }
     };
 
-    // Handle input change with debouncing
     const handleLocationInputChange = (e) => {
         const value = e.target.value;
         setLocationSearch(value);
         setLocationSearchError('');
 
-        // Clear previous timeout
         if (suggestionTimeoutRef.current) {
             clearTimeout(suggestionTimeoutRef.current);
         }
 
-        // Set new timeout for fetching suggestions
         suggestionTimeoutRef.current = setTimeout(() => {
             fetchSuggestions(value);
-        }, 300); // 300ms debounce
+        }, 300);
     };
 
-    // Handle suggestion selection
     const handleSuggestionClick = (suggestion) => {
         const { lat, lon, display_name } = suggestion;
         setLocation({
@@ -139,9 +190,8 @@ function DonorDashboard() {
         setSuggestions([]);
     };
 
-    // Handle search form submission
     const handleLocationSearch = async (e) => {
-        e.preventDefault(); // Prevent page refresh
+        e.preventDefault();
 
         if (!locationSearch.trim()) {
             setLocationSearchError('Please enter an address to search.');
@@ -243,36 +293,88 @@ function DonorDashboard() {
 
     const validateListingForm = () => {
         let isValid = true;
-        const newErrors = { title: '', description: '', quantity: '', country: '' };
+        setErrors(prev => ({
+            ...prev,
+            title: '',
+            description: '',
+            quantity: '',
+            expiresIn: '',
+            country: '',
+            location: ''
+        }));
 
         if (!title.trim()) {
-            newErrors.title = 'Title is required';
+            setErrors(prev => ({
+                ...prev,
+                title: 'Title is required'
+            }));
             isValid = false;
         }
 
         if (!description.trim()) {
-            newErrors.description = 'Description is required';
+            setErrors(prev => ({
+                ...prev,
+                description: 'Description is required'
+            }));
             isValid = false;
         } else if (description.trim().length < 10) {
-            newErrors.description = 'Description must be at least 10 characters';
+            setErrors(prev => ({
+                ...prev,
+                description: 'Description must be at least 10 characters'
+            }));
             isValid = false;
         }
 
         const quantityNumber = parseFloat(quantity);
         if (!quantity) {
-            newErrors.quantity = 'Quantity is required';
+            setErrors(prev => ({
+                ...prev,
+                quantity: 'Quantity is required'
+            }));
             isValid = false;
         } else if (isNaN(quantityNumber) || quantityNumber <= 0) {
-            newErrors.quantity = 'Quantity must be a number greater than 0';
+            setErrors(prev => ({
+                ...prev,
+                quantity: 'Quantity must be a number greater than 0'
+            }));
+            isValid = false;
+        }
+
+        const expiresInNumber = parseInt(expiresIn);
+        if (!expiresIn) {
+            setErrors(prev => ({
+                ...prev,
+                expiresIn: 'Expiration time is required'
+            }));
+            isValid = false;
+        } else if (isNaN(expiresInNumber) || expiresInNumber <= 0) {
+            setErrors(prev => ({
+                ...prev,
+                expiresIn: 'Expiration time must be a positive number'
+            }));
+            isValid = false;
+        } else if (expiresUnit === 'hours' && (expiresInNumber > 24)) {
+            setErrors(prev => ({
+                ...prev,
+                expiresIn: 'Expiration time must be 24 hours or less'
+            }));
+            isValid = false;
+        } else if (expiresUnit === 'days' && (expiresInNumber > 14)) {
+            setErrors(prev => ({
+                ...prev,
+                expiresIn: 'Expiration time must be 14 days or less'
+            }));
             isValid = false;
         }
 
         if (!location || !location.address || typeof location.latitude !== 'number' || typeof location.longitude !== 'number') {
-            alert('Please select a valid location with address, latitude, and longitude.');
+            setErrors(prev => ({
+                ...prev,
+                location: 'Please select a valid location with address, latitude, and longitude.'
+            }));
             isValid = false;
         }
 
-        setErrors(newErrors);
         return isValid;
     };
 
@@ -289,40 +391,82 @@ function DonorDashboard() {
                 return;
             }
             const quantityNumber = parseFloat(quantity);
-            const payload = { title, description, quantity: quantityNumber, location };
-            console.log('Sending food listing data:', payload);
-            await axios.post(
-                'http://localhost:5000/api/food',
-                payload,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            const expiresInNumber = parseInt(expiresIn);
+            const expiresAt = new Date(Date.now() + expiresInNumber * (expiresUnit === 'days' ? 24 * 60 * 60 * 1000 : 60 * 60 * 1000));
+            const payload = { title, description, quantity: quantityNumber, location, expiresAt };
+            const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+            console.log('Creating listing with payload:', payload); // Debug payload
+            const createResponse = await axios.post(`${backendUrl}/api/food`, payload, { headers: { Authorization: `Bearer ${token}` } });
+            console.log('Create listing response:', createResponse.data);
             alert('Food listing created successfully!');
-            setTitle('');
-            setDescription('');
-            setQuantity('');
-            setLocation(null);
-            setLocationSearch('');
-            setLocationSearchError('');
-            setSuggestions([]);
-            setShowSuggestions(false);
-            if (markerRef.current) {
-                markerRef.current.remove();
-                markerRef.current = null;
+
+            // Fetch updated listings
+            setTitle(''); setDescription(''); setQuantity(''); setLocation(null); setExpiresIn(''); setExpiresUnit('days');
+            setLocationSearch(''); setLocationSearchError(''); setSuggestions([]); setShowSuggestions(false);
+            if (markerRef.current) markerRef.current.remove();
+            const updatedListingsResponse = await axios.get(`${backendUrl}/api/food/all`, { headers: { Authorization: `Bearer ${token}` } });
+            console.log('Fetch all listings response:', updatedListingsResponse.data);
+            let userId;
+            try {
+                const userResponse = await axios.get(`${backendUrl}/api/user`, { headers: { Authorization: `Bearer ${token}` } });
+                userId = userResponse.data._id;
+                console.log('Fetched User ID after create:', userId);
+            } catch (userErr) {
+                console.error('Failed to fetch user ID after create:', {
+                    status: userErr.response?.status,
+                    data: userErr.response?.data,
+                    message: userErr.message,
+                });
+                userId = 'fallback-user-id'; // Temporary fallback
             }
-            if (countryInput) {
-                fetchWastageReport(countryInput);
-            }
+            setListings(updatedListingsResponse.data.filter(listing => listing.postedBy._id === userId));
+            if (countryInput) fetchWastageReport(countryInput);
         } catch (err) {
-            if (err.response && err.response.status === 401) {
+            console.error('Handle submit error:', {
+                step: err.config?.url === '/api/food' ? 'create' : err.config?.url === '/api/food/all' ? 'fetchAll' : 'fetchUser',
+                status: err.response?.status,
+                data: err.response?.data,
+                message: err.message,
+            });
+            if (err.response?.status === 401) {
                 alert('Your session has expired. Please log in again.');
                 localStorage.removeItem('token');
                 navigate('/login');
             } else {
-                console.error('Create listing error:', err);
-                alert(err.response?.data?.error || 'Failed to create listing. Check the console for details.');
+                alert(err.response?.data?.error || 'Failed to create or update listing. Check the console for details.');
             }
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleAcceptRequest = async (listingId, receiverId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+            await axios.put(
+                `${backendUrl}/api/food/accept-request/${listingId}`,
+                { receiverId },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            alert('Request accepted!');
+            const updatedListings = await axios.get(`${backendUrl}/api/food/all`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            let userId;
+            try {
+                const userResponse = await axios.get(`${backendUrl}/api/user`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                userId = userResponse.data._id;
+            } catch (userErr) {
+                console.warn('Failed to fetch user ID, using placeholder:', userErr);
+                userId = 'fallback-user-id'; // Replace with actual logic or remove if not needed
+            }
+            setListings(updatedListings.data.filter(listing => listing.postedBy._id === userId));
+        } catch (err) {
+            console.error('Accept request error:', err);
+            alert(err.response?.data?.error || 'Failed to accept request. Check console for details.');
         }
     };
 
@@ -470,6 +614,32 @@ function DonorDashboard() {
                     {errors.quantity && <p className="error-message">{errors.quantity}</p>}
                 </div>
                 <div className="form-field">
+                    <label>Expiration Time</label>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        <input
+                            id="expiresIn"
+                            type="number"
+                            placeholder="e.g., 3"
+                            value={expiresIn}
+                            onChange={(e) => setExpiresIn(e.target.value)}
+                            required
+                            disabled={loading}
+                            className={errors.expiresIn ? 'error' : ''}
+                            style={{ width: '100px' }}
+                        />
+                        <select
+                            value={expiresUnit}
+                            onChange={(e) => setExpiresUnit(e.target.value)}
+                            disabled={loading}
+                            style={{ padding: '5px' }}
+                        >
+                            <option value="hours">Hours</option>
+                            <option value="days">Days</option>
+                        </select>
+                    </div>
+                    {errors.expiresIn && <p className="error-message">{errors.expiresIn}</p>}
+                </div>
+                <div className="form-field">
                     <label>Pickup Location</label>
                     <div className="location-search-container">
                         <form onSubmit={handleLocationSearch} className="location-search-form">
@@ -479,7 +649,7 @@ function DonorDashboard() {
                                     value={locationSearch}
                                     onChange={handleLocationInputChange}
                                     onFocus={() => setShowSuggestions(true)}
-                                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)} // Delay to allow click
+                                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                                     placeholder="Enter an address (e.g., 123 Main St, City)"
                                     className="location-search-input"
                                     disabled={loading}
@@ -490,7 +660,7 @@ function DonorDashboard() {
                                             <li
                                                 key={index}
                                                 className="suggestion-item"
-                                                onMouseDown={() => handleSuggestionClick(suggestion)} // Use onMouseDown to handle before onBlur
+                                                onMouseDown={() => handleSuggestionClick(suggestion)}
                                             >
                                                 {suggestion.display_name}
                                             </li>
@@ -533,6 +703,53 @@ function DonorDashboard() {
                     {loading ? 'Creating...' : 'Create Listing'}
                 </button>
             </form>
+
+            {/* Display donor's listings with request management */}
+            <h2>Your Active Listings</h2>
+            {errors.listings && <p className="error-message">{errors.listings}</p>}
+            {listings.length > 0 ? (
+                <ul className="listings-list">
+                    {listings.map((listing) => (
+                        <li key={listing._id} className="listing-item">
+                            <h3>{listing.title}</h3>
+                            <p>{listing.description}</p>
+                            <p>Quantity: {listing.quantity} kg</p>
+                            <p>Location: {listing.location.address}</p>
+                            <p>Status: {listing.status}</p>
+                            <p>Expires At: {new Date(listing.expiresAt).toLocaleString()}</p>
+                            {listing.status === 'available' && listing.requestedBy && listing.requestedBy.length > 0 && (
+                                <>
+                                    <h4>Pending Requests:</h4>
+                                    <ul>
+                                        {listing.requestedBy.map((requestor) => (
+                                            <li key={requestor._id}>
+                                                {requestor.email} ({requestor.phone})
+                                                <button
+                                                    onClick={() => handleAcceptRequest(listing._id, requestor._id)}
+                                                    disabled={loading}
+                                                >
+                                                    Accept
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </>
+                            )}
+                            {listing.status === 'claimed' && (
+                                <p>Claimed by: {listing.claimedBy.email}</p>
+                            )}
+                            {listing.status === 'deal_confirmed' && (
+                                <p>Deal confirmed! Locations have been emailed.</p>
+                            )}
+                            {listing.status === 'expired' && (
+                                <p style={{ color: '#f44336' }}>This listing has expired.</p>
+                            )}
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <p>No active listings found.</p>
+            )}
         </div>
     );
 }

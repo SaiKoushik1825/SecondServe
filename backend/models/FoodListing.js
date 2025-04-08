@@ -32,21 +32,29 @@ const foodListingSchema = new mongoose.Schema({
     },
     country: {
         type: String,
-        required: [true, 'Country is required'],
+        default: 'Unknown',
     },
     postedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: [true, 'Posted by user is required'],
     },
-    status: {
-        type: String,
-        enum: ['available', 'claimed', 'expired', 'received'],
-        default: 'available',
-    },
+    requestedBy: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    }], // Array of users who have requested the listing
     claimedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
+        default: null,
+    },
+    status: {
+        type: String,
+        enum: ['available', 'claimed', 'deal_confirmed', 'expired', 'received'],
+        default: 'available',
+    },
+    dealConfirmedAt: {
+        type: Date,
         default: null,
     },
     receivedAt: {
@@ -55,9 +63,7 @@ const foodListingSchema = new mongoose.Schema({
     },
     expiresAt: {
         type: Date,
-        default: function () {
-            return new Date(this.createdAt.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from creation
-        },
+        default: null,
     },
     createdAt: {
         type: Date,
@@ -69,9 +75,20 @@ const foodListingSchema = new mongoose.Schema({
     },
 });
 
-// Update the updatedAt field before saving
+// Update the updatedAt field and set expiresAt before saving
 foodListingSchema.pre('save', function (next) {
     this.updatedAt = Date.now();
+    if (this.isModified('expiresAt') && this.expiresAt) {
+        // Use the provided expiresAt if modified, otherwise set a default
+        this.expiresAt = new Date(this.expiresAt);
+    } else if (!this.expiresAt && this.createdAt) {
+        // Default to 7 days if no expiresAt is provided
+        this.expiresAt = new Date(this.createdAt.getTime() + 7 * 24 * 60 * 60 * 1000);
+    }
+    // Ensure expiresAt is not before createdAt
+    if (this.expiresAt && this.createdAt) {
+        this.expiresAt = new Date(Math.max(this.createdAt.getTime(), this.expiresAt.getTime()));
+    }
     next();
 });
 

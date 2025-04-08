@@ -142,6 +142,16 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
+router.get('/user', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select('_id email role');
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        res.json(user);
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // Get Current User
 router.get('/me', auth, async (req, res) => {
     try {

@@ -57,6 +57,12 @@ const getCountryFromAddress = async (address) => {
     }
 };
 
+router.post('/', auth, async (req, res) => {
+    const listing = new FoodListing({ ...req.body, postedBy: req.user._id });
+    await listing.save();
+    res.json(listing);
+});
+
 // Create a food listing
 router.post('/', auth, async (req, res) => {
     const { title, description, quantity, location } = req.body;
@@ -110,7 +116,9 @@ router.get('/', async (req, res) => {
             { $set: { status: 'expired' } }
         );
 
-        const listings = await FoodListing.find({ status: 'available' }).populate('postedBy', 'email');
+        const listings = await FoodListing.find({ status: { $in: ['available', 'claimed'] } })
+            .populate('postedBy', 'email phone')
+            .populate('requestedBy', 'email phone');
         res.json(listings);
     } catch (err) {
         console.error('Fetch food listings error:', err);
@@ -125,8 +133,9 @@ router.get('/all', auth, async (req, res) => {
             return res.status(403).json({ error: 'Access denied. Admin privileges required.' });
         }
         const listings = await FoodListing.find()
-            .populate('postedBy', 'email')
-            .populate('claimedBy', 'email');
+            .populate('postedBy', 'email phone')
+            .populate('requestedBy', 'email phone')
+            .populate('claimedBy', 'email phone');
         res.json(listings);
     } catch (err) {
         console.error('Fetch all food listings error:', err);
@@ -134,7 +143,7 @@ router.get('/all', auth, async (req, res) => {
     }
 });
 
-// Claim a food listing
+// Request a food listing (replaces claim)
 router.put('/claim/:id', auth, async (req, res) => {
     try {
         const listing = await FoodListing.findById(req.params.id);
@@ -144,27 +153,148 @@ router.put('/claim/:id', auth, async (req, res) => {
         if (listing.status !== 'available') {
             return res.status(400).json({ error: 'Listing is not available' });
         }
-        listing.status = 'claimed';
-        listing.claimedBy = req.user._id;
+        if (listing.requestedBy && listing.requestedBy.some(user => user.toString() === req.user._id.toString())) {
+            return res.status(400).json({ error: 'You have already requested this listing' });
+        }
+
+        listing.requestedBy = listing.requestedBy || [];
+        listing.requestedBy.push(req.user._id);
         await listing.save();
 
-        // Notify the donor that their listing has been claimed
+        // Notify the donor that a request has been made
         const donor = await User.findById(listing.postedBy);
         const receiver = await User.findById(req.user._id);
         if (donor) {
             const mailOptions = {
                 to: donor.email,
                 from: process.env.EMAIL_USER,
-                subject: 'Your Food Listing Has Been Claimed',
-                text: `Hello ${donor.email},\n\nYour food listing titled "${listing.title}" has been claimed by ${receiver.email}. They will contact you for pickup details.\n\nThank you for using the Food Rescue Platform!`,
+                subject: 'New Request for Your Food Listing',
+                text: `Hello ${donor.email},\n\nYour food listing titled "${listing.title}" has been requested by ${receiver.email}. Please review and accept the request in your Donor Dashboard.\n\nThank you for using the Food Rescue Platform!`,
             };
             await transporter.sendMail(mailOptions);
         }
 
-        res.json({ message: 'Listing claimed successfully', listing });
+        res.json({ message: 'Request sent successfully', listing });
     } catch (err) {
-        console.error('Claim food listing error:', err);
+        console.error('Request listing error:', err);
         res.status(500).json({ error: err.message });
+    }
+});
+
+// Accept a request for a food listing
+router.put('/accept-request/:id', auth, async (req, res) => {
+    try {
+        const listing = await FoodListing.findById(req.params.id).populate('postedBy requestedBy');
+        if (!listing) {
+            return res.status(404).json({ error: 'Listing not found' });
+        }
+        if (listing.postedBy._id.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ error: 'Only the donor can accept requests' });
+        }
+        if (listing.status !== 'available' || !listing.requestedBy || listing.requestedBy.length === 0) {
+            return res.status(400).json({ error: 'No pending requests to accept' });
+        }
+
+        // Accept the first request (or allow selection via req.body.receiverId in the future)
+        const acceptedReceiverId = req.body.receiverId || listing.requestedBy[0]._id;
+        if (!listing.requestedBy.some(user => user._id.toString() === acceptedReceiverId.toString())) {
+            return res.status(400).json({ error: 'Invalid receiver ID' });
+        }
+
+        listing.status = 'claimed';
+        listing.claimedBy = acceptedReceiverId;
+        listing.requestedBy = listing.requestedBy.filter(user => user._id.toString() !== acceptedReceiverId.toString());
+        await listing.save();
+
+        // Notify the accepted receiver
+        const receiver = await User.findById(acceptedReceiverId);
+        if (receiver) {
+            const mailOptions = {
+                to: receiver.email,
+                from: process.env.EMAIL_USER,
+                subject: 'Your Request Has Been Accepted',
+                text: `Hello ${receiver.email},\n\nYour request for "${listing.title}" has been accepted by the donor. Please proceed to confirm the deal.\n\nThank you for using the Food Rescue Platform!`,
+            };
+            await transporter.sendMail(mailOptions);
+        }
+
+        // Notify other requesters (if any)
+        listing.requestedBy.forEach(async (rejectedUser) => {
+            const rejectedReceiver = await User.findById(rejectedUser._id);
+            if (rejectedReceiver) {
+                const mailOptions = {
+                    to: rejectedReceiver.email,
+                    from: process.env.EMAIL_USER,
+                    subject: 'Your Request Was Not Accepted',
+                    text: `Hello ${rejectedReceiver.email},\n\nYour request for "${listing.title}" was not accepted as another receiver was chosen. Thank you for your interest!\n\nThank you for using the Food Rescue Platform!`,
+                };
+                await transporter.sendMail(mailOptions);
+            }
+        });
+
+        res.json({ message: 'Request accepted successfully', listing });
+    } catch (err) {
+        console.error('Accept request error:', err);
+        res.status(500).json({ error: 'Failed to accept request. Check server logs.' });
+    }
+});
+
+// Confirm deal for a food listing
+router.put('/confirm-deal/:id', auth, async (req, res) => {
+    try {
+        const listing = await FoodListing.findById(req.params.id).populate('postedBy claimedBy');
+        if (!listing) {
+            return res.status(404).json({ error: 'Listing not found' });
+        }
+        if (listing.status !== 'claimed' || !listing.claimedBy || listing.claimedBy._id.toString() !== req.user._id.toString()) {
+            return res.status(400).json({ error: 'Listing must be claimed by you to confirm the deal' });
+        }
+
+        // Get receiverLocation from request body, fallback to default if not provided
+        let receiverLocation = req.body.receiverLocation || {
+            address: 'Current Location (Geolocation)',
+            latitude: 0,
+            longitude: 0,
+        };
+        if (!receiverLocation.address || typeof receiverLocation.latitude !== 'number' || typeof receiverLocation.longitude !== 'number') {
+            console.warn('Incomplete receiver location provided, using fallback with default coordinates.');
+            receiverLocation = {
+                address: 'Current Location (Geolocation)',
+                latitude: 0,
+                longitude: 0,
+            };
+        }
+
+        listing.status = 'deal_confirmed';
+        listing.dealConfirmedAt = new Date();
+        await listing.save();
+
+        // Prepare email content
+        const donorEmail = listing.postedBy.email;
+        const receiverEmail = listing.claimedBy.email;
+        const donorLocation = `${listing.location.address} (Lat: ${listing.location.latitude}, Long: ${listing.location.longitude})`;
+        const receiverLocationStr = `${receiverLocation.address} (Lat: ${receiverLocation.latitude}, Long: ${receiverLocation.longitude})`;
+
+        // Email to Donor
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: donorEmail,
+            subject: 'Deal Confirmed - Receiver Location',
+            text: `Hello ${donorEmail},\n\nThe deal for "${listing.title}" has been confirmed. The receiver's location is:\n${receiverLocationStr}\n\nPlease coordinate the pickup. Contact the receiver at ${receiverEmail}.\n\nBest,\nSecondServe Team`,
+        });
+
+        // Email to Receiver
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: receiverEmail,
+            subject: 'Deal Confirmed - Donor Location',
+            text: `Hello ${receiverEmail},\n\nThe deal for "${listing.title}" has been confirmed. The donor's location is:\n${donorLocation}\n\nPlease coordinate the pickup. Contact the donor at ${donorEmail}.\n\nBest,\nSecondServe Team`,
+        });
+
+        res.status(200).json({ message: 'Deal confirmed and locations emailed.' });
+    } catch (err) {
+        console.error('Confirm deal error:', err);
+        res.status(500).json({ error: 'Failed to confirm deal. Check server logs.' });
     }
 });
 
@@ -214,9 +344,9 @@ router.get('/predict-waste', auth, async (req, res) => {
             return res.status(400).json({ error: 'Country query parameter is required' });
         }
 
-        // Define the time range for the year 2025 (from Jan 1, 2025 to current date, March 24, 2025)
+        // Define the time range for the year 2025 (from Jan 1, 2025 to current date, April 08, 2025)
         const startDate = new Date('2025-01-01T00:00:00Z');
-        const endDate = new Date(); // Current date: March 24, 2025
+        const endDate = new Date(); // Current date: April 08, 2025
 
         // Calculate the number of weeks in the period
         const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000;

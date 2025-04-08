@@ -34,12 +34,10 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 
 function ReceiverDashboard() {
     const [listings, setListings] = useState([]);
-    const [filteredListings, setFilteredListings] = useState([]); // Renamed from filteredListings, now the primary state
+    const [filteredListings, setFilteredListings] = useState([]); // Primary state for filtered listings
     const [trends, setTrends] = useState([]);
     const [selectedListing, setSelectedListing] = useState(null);
-    const [route, setRoute] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [directionsLoading, setDirectionsLoading] = useState(false);
     const [userLocation, setUserLocation] = useState(null);
     const [searchedLocation, setSearchedLocation] = useState(null);
     const [searchAddress, setSearchAddress] = useState('');
@@ -50,7 +48,6 @@ function ReceiverDashboard() {
     const navigate = useNavigate();
     const mapRef = useRef(null);
     const markersRef = useRef([]);
-    const routeLayerRef = useRef(null);
     const searchedMarkerRef = useRef(null);
     const suggestionTimeoutRef = useRef(null);
 
@@ -69,7 +66,9 @@ function ReceiverDashboard() {
             try {
                 setLoading(true);
                 const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
-                const listingsResponse = await axios.get(`${backendUrl}/api/food`);
+                const listingsResponse = await axios.get(`${backendUrl}/api/food`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
                 setListings(listingsResponse.data);
 
                 const trendsResponse = await axios.get(`${backendUrl}/api/food/donation-trends`);
@@ -81,26 +80,41 @@ function ReceiverDashboard() {
                 setLoading(false);
             }
         };
-        fetchData();
+        const token = localStorage.getItem('token');
+        if (token) fetchData();
     }, []);
 
-    // Get the user's current location
+    // Get the user's current location with reverse geocoding
     useEffect(() => {
         if (!navigator.geolocation) {
             alert('Geolocation is not supported by your browser. Showing all listings.');
-            setUserLocation(null);
+            setUserLocation({ lat: 37.7749, lng: -122.4194, address: 'San Francisco, CA' }); // Default fallback
             return;
         }
 
         navigator.geolocation.getCurrentPosition(
-            (position) => {
+            async (position) => {
                 const { latitude, longitude } = position.coords;
-                setUserLocation({ lat: latitude, lng: longitude });
+                // Reverse geocode to get address
+                try {
+                    const response = await axios.get('https://nominatim.openstreetmap.org/reverse', {
+                        params: {
+                            lat: latitude,
+                            lon: longitude,
+                            format: 'json',
+                        },
+                    });
+                    const address = response.data.display_name || 'Current Location';
+                    setUserLocation({ lat: latitude, lng: longitude, address });
+                } catch (err) {
+                    console.error('Reverse geocoding error:', err);
+                    setUserLocation({ lat: latitude, lng: longitude, address: 'Current Location' });
+                }
             },
             (err) => {
                 console.error('Geolocation error:', err);
                 alert('Unable to retrieve your location. Showing all listings.');
-                setUserLocation(null);
+                setUserLocation({ lat: 37.7749, lng: -122.4194, address: 'San Francisco, CA' }); // Default fallback
             }
         );
     }, []);
@@ -205,25 +219,37 @@ function ReceiverDashboard() {
         }
     };
 
-    // Sort and filter listings by distance
+    // Sort and filter listings by distance, excluding expired and deal_confirmed ones
     useEffect(() => {
         const referenceLocation = searchedLocation || userLocation;
+        const currentDate = new Date();
+
         if (!referenceLocation || !listings.length) {
-            setFilteredListings(listings);
+            setFilteredListings(
+                listings.filter(listing => 
+                    (!listing.expiresAt || new Date(listing.expiresAt) > currentDate) && 
+                    listing.status !== 'deal_confirmed'
+                )
+            );
             return;
         }
 
-        const sorted = [...listings].map(listing => {
-            const distance = calculateDistance(
-                referenceLocation.lat,
-                referenceLocation.lng,
-                listing.location.latitude,
-                listing.location.longitude
-            );
-            return { ...listing, distance };
-        }).sort((a, b) => a.distance - b.distance);
+        const sorted = [...listings]
+            .filter(listing => 
+                (!listing.expiresAt || new Date(listing.expiresAt) > currentDate) && 
+                listing.status !== 'deal_confirmed'
+            )
+            .map(listing => {
+                const distance = calculateDistance(
+                    referenceLocation.lat,
+                    referenceLocation.lng,
+                    listing.location.latitude,
+                    listing.location.longitude
+                );
+                return { ...listing, distance };
+            })
+            .sort((a, b) => a.distance - b.distance);
 
-        // Filter listings within the radius (only if searchedLocation is set)
         if (searchedLocation) {
             const filtered = sorted.filter(listing => listing.distance <= radius);
             setFilteredListings(filtered);
@@ -300,16 +326,12 @@ function ReceiverDashboard() {
         }, 0);
     }, [searchedLocation]);
 
-    // Update markers and route for listings
+    // Update markers for listings
     useEffect(() => {
         if (!mapRef.current) return;
 
         markersRef.current.forEach(marker => marker.remove());
         markersRef.current = [];
-        if (routeLayerRef.current) {
-            routeLayerRef.current.remove();
-            routeLayerRef.current = null;
-        }
 
         filteredListings.forEach(listing => {
             const marker = L.marker([listing.location.latitude, listing.location.longitude])
@@ -325,18 +347,18 @@ function ReceiverDashboard() {
                         <p>Quantity: ${listing.quantity} kg</p>
                         <p>Location: ${listing.location.address}</p>
                         <p>Distance: ${listing.distance ? listing.distance.toFixed(2) + ' km' : 'Unknown'}</p>
+                        <p>Expires At: ${new Date(listing.expiresAt).toLocaleDateString()}</p>
                         <p>Posted by: ${listing.postedBy.email}</p>
                         ${listing.status === 'available' ? `
                             <button onclick="document.getElementById('claim-${listing._id}').click()">Claim Listing</button>
                         ` : listing.status === 'claimed' ? `
-                            <button onclick="document.getElementById('confirm-${listing._id}').click()">Confirm Receipt</button>
+                            <p>Donor Contact: ${listing.postedBy.phone} (Phone), ${listing.postedBy.email} (Email)</p>
+                            <button onclick="document.getElementById('confirm-deal-${listing._id}').click()">Confirm Deal</button>
+                        ` : listing.status === 'deal_confirmed' ? `
+                            <p>Deal confirmed! Locations have been emailed.</p>
                         ` : listing.status === 'expired' ? `
-                            <p>This listing has expired.</p>
+                            <p style="color: #f44336">This listing has expired.</p>
                         ` : ''}
-                        <br/>
-                        <button onclick="document.getElementById('directions-${listing._id}').click()" ${directionsLoading ? 'disabled' : ''}>
-                            ${directionsLoading ? 'Loading Directions...' : 'Show Directions'}
-                        </button>
                     </div>
                 `).openPopup();
             }
@@ -347,7 +369,7 @@ function ReceiverDashboard() {
                 mapRef.current.invalidateSize();
             }, 0);
         }
-    }, [filteredListings, selectedListing, directionsLoading]);
+    }, [filteredListings, selectedListing]);
 
     const handleClaim = async (listingId) => {
         try {
@@ -363,15 +385,43 @@ function ReceiverDashboard() {
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            alert('Listing claimed successfully!');
+            alert('Request sent to donor! Await their approval.');
             setListings(listings.map(listing =>
-                listing._id === listingId ? { ...listing, status: 'claimed', claimedBy: response.data.claimedBy } : listing
+                listing._id === listingId ? { ...listing, requestedBy: response.data.requestedBy } : listing
             ));
-            setSelectedListing({ ...selectedListing, status: 'claimed', claimedBy: response.data.claimedBy });
-            setRoute(null);
+            setSelectedListing({ ...selectedListing, requestedBy: response.data.requestedBy });
         } catch (err) {
             console.error('Claim listing error:', err);
-            alert(err.response?.data?.error || 'Failed to claim listing. Check the console for details.');
+            alert(err.response?.data?.error || 'Failed to send request. Check the console for details.');
+        }
+    };
+
+    const handleConfirmDeal = async (listingId) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Please log in to confirm the deal.');
+                navigate('/login');
+                return;
+            }
+            if (!userLocation) {
+                alert('Please allow location access to confirm the deal.');
+                return;
+            }
+            const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+            const response = await axios.put(
+                `${backendUrl}/api/food/confirm-deal/${listingId}`,
+                {
+                    receiverLocation: userLocation,
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            alert('Deal confirmed! Locations have been emailed to both parties.');
+            setListings(listings.filter(listing => listing._id !== listingId)); // Remove listing
+            setSelectedListing(null);
+        } catch (err) {
+            console.error('Confirm deal error:', err);
+            alert(err.response?.data?.error || 'Failed to confirm deal. Check the console for details.');
         }
     };
 
@@ -392,56 +442,10 @@ function ReceiverDashboard() {
             alert('Receipt confirmed! The listing has been removed.');
             setListings(listings.filter((listing) => listing._id !== listingId));
             setSelectedListing(null);
-            setRoute(null);
         } catch (err) {
             console.error('Confirm receipt error:', err);
             alert(err.response?.data?.error || 'Failed to confirm receipt. Check the console for details.');
         }
-    };
-
-    const handleShowDirections = async (listing) => {
-        if (!navigator.geolocation) {
-            alert('Geolocation is not supported by your browser');
-            return;
-        }
-
-        setDirectionsLoading(true);
-
-        navigator.geolocation.getCurrentPosition(async (position) => {
-            const userLocation = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-            };
-
-            try {
-                const response = await axios.get('http://router.project-osrm.org/route/v1/driving/' +
-                    `${userLocation.lng},${userLocation.lat};${listing.location.longitude},${listing.location.latitude}`, {
-                    params: {
-                        overview: 'full',
-                        geometries: 'polyline',
-                    },
-                });
-
-                const routeData = response.data.routes[0];
-                const coordinates = L.Polyline.fromEncoded(routeData.geometry).getLatLngs();
-
-                if (routeLayerRef.current) {
-                    routeLayerRef.current.remove();
-                }
-
-                routeLayerRef.current = L.polyline(coordinates, { color: 'blue' }).addTo(mapRef.current);
-                mapRef.current.fitBounds(L.polyline(coordinates).getBounds());
-                setRoute(routeData);
-            } catch (err) {
-                console.error('Error fetching directions:', err);
-                alert('Error fetching directions');
-            } finally {
-                setDirectionsLoading(false);
-            }
-        }, () => {
-            alert('Unable to retrieve your location');
-            setDirectionsLoading(false);
-        });
     };
 
     return (
@@ -517,22 +521,23 @@ function ReceiverDashboard() {
                                     <p>Quantity: {listing.quantity} kg</p>
                                     <p>Location: {listing.location.address}</p>
                                     <p>Distance: {listing.distance ? listing.distance.toFixed(2) + ' km' : 'Unknown'}</p>
+                                    <p>Expires At: {new Date(listing.expiresAt).toLocaleDateString()}</p>
                                     <p>Posted by: {listing.postedBy.email}</p>
                                     {listing.status === 'available' && (
                                         <button onClick={() => handleClaim(listing._id)}>Claim Listing</button>
                                     )}
                                     {listing.status === 'claimed' && (
-                                        <button onClick={() => handleConfirmReceipt(listing._id)}>Confirm Receipt</button>
+                                        <>
+                                            <p>Donor Contact: ${listing.postedBy.phone} (Phone), ${listing.postedBy.email} (Email)</p>
+                                            <button onClick={() => handleConfirmDeal(listing._id)}>Confirm Deal</button>
+                                        </>
+                                    )}
+                                    {listing.status === 'deal_confirmed' && (
+                                        <p>Deal confirmed! Locations have been emailed.</p>
                                     )}
                                     {listing.status === 'expired' && (
                                         <p style={{ color: '#f44336' }}>This listing has expired.</p>
                                     )}
-                                    <button
-                                        onClick={() => handleShowDirections(listing)}
-                                        disabled={directionsLoading}
-                                    >
-                                        {directionsLoading ? 'Loading Directions...' : 'Show Directions'}
-                                    </button>
                                 </li>
                             ))}
                         </ul>
@@ -552,27 +557,19 @@ function ReceiverDashboard() {
                                 Claim Listing
                             </button>
                             <button
+                                id={`confirm-deal-${listing._id}`}
+                                onClick={() => handleConfirmDeal(listing._id)}
+                            >
+                                Confirm Deal
+                            </button>
+                            <button
                                 id={`confirm-${listing._id}`}
                                 onClick={() => handleConfirmReceipt(listing._id)}
                             >
                                 Confirm Receipt
                             </button>
-                            <button
-                                id={`directions-${listing._id}`}
-                                onClick={() => handleShowDirections(listing)}
-                            >
-                                Show Directions
-                            </button>
                         </div>
                     ))}
-
-                    {route && (
-                        <div className="directions-container">
-                            <h3>Directions to Pickup Location</h3>
-                            <p>Distance: {(route.distance / 1000).toFixed(2)} km</p>
-                            <p>Duration: {(route.duration / 60).toFixed(2)} minutes</p>
-                        </div>
-                    )}
                 </>
             )}
 
