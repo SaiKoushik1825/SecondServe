@@ -53,7 +53,7 @@ function ReceiverDashboard() {
 
     // Check authentication on mount
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token'); // Changed from localStorage
         if (!token) {
             alert('Please log in to access the Receiver Dashboard.');
             navigate('/login');
@@ -67,9 +67,13 @@ function ReceiverDashboard() {
                 setLoading(true);
                 const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
                 const listingsResponse = await axios.get(`${backendUrl}/api/food`, {
-                    headers: { Authorization: `Bearer ${token}` },
+                    headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }, // Changed from localStorage
                 });
-                setListings(listingsResponse.data);
+                // Filter only available listings as per backend update
+                const availableListings = listingsResponse.data.filter(
+                    (listing) => listing.status === 'available' && (!listing.expiresAt || new Date(listing.expiresAt) > new Date())
+                );
+                setListings(availableListings);
 
                 const trendsResponse = await axios.get(`${backendUrl}/api/food/donation-trends`);
                 setTrends(trendsResponse.data.trends);
@@ -80,7 +84,7 @@ function ReceiverDashboard() {
                 setLoading(false);
             }
         };
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token'); // Changed from localStorage
         if (token) fetchData();
     }, []);
 
@@ -95,7 +99,6 @@ function ReceiverDashboard() {
         navigator.geolocation.getCurrentPosition(
             async (position) => {
                 const { latitude, longitude } = position.coords;
-                // Reverse geocode to get address
                 try {
                     const response = await axios.get('https://nominatim.openstreetmap.org/reverse', {
                         params: {
@@ -219,27 +222,21 @@ function ReceiverDashboard() {
         }
     };
 
-    // Sort and filter listings by distance, excluding expired and deal_confirmed ones
+    // Sort and filter listings by distance
     useEffect(() => {
         const referenceLocation = searchedLocation || userLocation;
         const currentDate = new Date();
 
         if (!referenceLocation || !listings.length) {
             setFilteredListings(
-                listings.filter(listing => 
-                    (!listing.expiresAt || new Date(listing.expiresAt) > currentDate) && 
-                    listing.status !== 'deal_confirmed'
-                )
+                listings.filter((listing) => listing.status === 'available' && (!listing.expiresAt || new Date(listing.expiresAt) > currentDate))
             );
             return;
         }
 
         const sorted = [...listings]
-            .filter(listing => 
-                (!listing.expiresAt || new Date(listing.expiresAt) > currentDate) && 
-                listing.status !== 'deal_confirmed'
-            )
-            .map(listing => {
+            .filter((listing) => listing.status === 'available' && (!listing.expiresAt || new Date(listing.expiresAt) > currentDate))
+            .map((listing) => {
                 const distance = calculateDistance(
                     referenceLocation.lat,
                     referenceLocation.lng,
@@ -251,7 +248,7 @@ function ReceiverDashboard() {
             .sort((a, b) => a.distance - b.distance);
 
         if (searchedLocation) {
-            const filtered = sorted.filter(listing => listing.distance <= radius);
+            const filtered = sorted.filter((listing) => listing.distance <= radius);
             setFilteredListings(filtered);
         } else {
             setFilteredListings(sorted);
@@ -330,10 +327,10 @@ function ReceiverDashboard() {
     useEffect(() => {
         if (!mapRef.current) return;
 
-        markersRef.current.forEach(marker => marker.remove());
+        markersRef.current.forEach((marker) => marker.remove());
         markersRef.current = [];
 
-        filteredListings.forEach(listing => {
+        filteredListings.forEach((listing) => {
             const marker = L.marker([listing.location.latitude, listing.location.longitude])
                 .addTo(mapRef.current)
                 .on('click', () => setSelectedListing(listing));
@@ -351,13 +348,6 @@ function ReceiverDashboard() {
                         <p>Posted by: ${listing.postedBy.email}</p>
                         ${listing.status === 'available' ? `
                             <button onclick="document.getElementById('claim-${listing._id}').click()">Claim Listing</button>
-                        ` : listing.status === 'claimed' ? `
-                            <p>Donor Contact: ${listing.postedBy.phone} (Phone), ${listing.postedBy.email} (Email)</p>
-                            <button onclick="document.getElementById('confirm-deal-${listing._id}').click()">Confirm Deal</button>
-                        ` : listing.status === 'deal_confirmed' ? `
-                            <p>Deal confirmed! Locations have been emailed.</p>
-                        ` : listing.status === 'expired' ? `
-                            <p style="color: #f44336">This listing has expired.</p>
                         ` : ''}
                     </div>
                 `).openPopup();
@@ -373,7 +363,8 @@ function ReceiverDashboard() {
 
     const handleClaim = async (listingId) => {
         try {
-            const token = localStorage.getItem('token');
+            setLoading(true);
+            const token = sessionStorage.getItem('token'); // Changed from localStorage
             if (!token) {
                 alert('Please log in to claim a listing.');
                 navigate('/login');
@@ -385,20 +376,24 @@ function ReceiverDashboard() {
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            alert('Request sent to donor! Await their approval.');
-            setListings(listings.map(listing =>
-                listing._id === listingId ? { ...listing, requestedBy: response.data.requestedBy } : listing
-            ));
-            setSelectedListing({ ...selectedListing, requestedBy: response.data.requestedBy });
+            console.log('Claim response:', response.data);
+            alert(`Request sent to donor! Email notification status: ${response.data.emailStatus.message || 'Not provided'}`);
+            // Remove the claimed listing from the state
+            setListings((prevListings) => prevListings.filter((listing) => listing._id !== listingId));
+            setFilteredListings((prevFiltered) => prevFiltered.filter((listing) => listing._id !== listingId));
+            setSelectedListing(null);
         } catch (err) {
             console.error('Claim listing error:', err);
-            alert(err.response?.data?.error || 'Failed to send request. Check the console for details.');
+            alert(`Failed to send request. Email status: ${err.response?.data?.emailStatus?.message || 'Unknown'}. Check console for details.`);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleConfirmDeal = async (listingId) => {
         try {
-            const token = localStorage.getItem('token');
+            setLoading(true);
+            const token = sessionStorage.getItem('token'); // Changed from localStorage
             if (!token) {
                 alert('Please log in to confirm the deal.');
                 navigate('/login');
@@ -416,41 +411,60 @@ function ReceiverDashboard() {
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            alert('Deal confirmed! Locations have been emailed to both parties.');
-            setListings(listings.filter(listing => listing._id !== listingId)); // Remove listing
+            console.log('Confirm deal response:', response.data);
+            alert(`Deal confirmed! Email notification status: ${response.data.emailStatus.message || 'Not provided'}`);
+            setListings((prevListings) => prevListings.filter((listing) => listing._id !== listingId));
+            setFilteredListings((prevFiltered) => prevFiltered.filter((listing) => listing._id !== listingId));
             setSelectedListing(null);
         } catch (err) {
             console.error('Confirm deal error:', err);
-            alert(err.response?.data?.error || 'Failed to confirm deal. Check the console for details.');
+            alert(`Failed to confirm deal. Email status: ${err.response?.data?.emailStatus?.message || 'Unknown'}. Check console for details.`);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleConfirmReceipt = async (listingId) => {
         try {
-            const token = localStorage.getItem('token');
+            setLoading(true);
+            const token = sessionStorage.getItem('token'); // Changed from localStorage
             if (!token) {
                 alert('Please log in to confirm receipt.');
                 navigate('/login');
                 return;
             }
             const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
-            await axios.put(
+            const response = await axios.put(
                 `${backendUrl}/api/food/confirm-receipt/${listingId}`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            alert('Receipt confirmed! The listing has been removed.');
-            setListings(listings.filter((listing) => listing._id !== listingId));
+            console.log('Confirm receipt response:', response.data);
+            alert(`Receipt confirmed! Email notification status: ${response.data.emailStatus.message || 'Not provided'}`);
+            setListings((prevListings) => prevListings.filter((listing) => listing._id !== listingId));
+            setFilteredListings((prevFiltered) => prevFiltered.filter((listing) => listing._id !== listingId));
             setSelectedListing(null);
         } catch (err) {
             console.error('Confirm receipt error:', err);
-            alert(err.response?.data?.error || 'Failed to confirm receipt. Check the console for details.');
+            alert(`Failed to confirm receipt. Email status: ${err.response?.data?.emailStatus?.message || 'Unknown'}. Check console for details.`);
+        } finally {
+            setLoading(false);
         }
+    };
+
+    const handleLogout = () => {
+        sessionStorage.removeItem('token'); // Changed from localStorage
+        navigate('/login');
     };
 
     return (
         <div className="dashboard-container receiver-dashboard">
-            <h1>Receiver Dashboard</h1>
+            <div className="dashboard-header">
+                <h1>Receiver Dashboard</h1>
+                <button onClick={handleLogout} className="logout-button">
+                    Logout
+                </button>
+            </div>
 
             {/* Search Input for Location */}
             <div style={{ marginBottom: '20px' }}>
@@ -465,6 +479,7 @@ function ReceiverDashboard() {
                             onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                             placeholder="Enter an address (e.g., 123 Main St, City)"
                             className="search-input"
+                            disabled={loading}
                         />
                         {showSuggestions && suggestions.length > 0 && (
                             <ul className="suggestions-list">
@@ -480,7 +495,7 @@ function ReceiverDashboard() {
                             </ul>
                         )}
                     </div>
-                    <button type="submit" className="search-button">
+                    <button type="submit" className="search-button" disabled={loading}>
                         Search
                     </button>
                     {searchedLocation && (
@@ -488,6 +503,7 @@ function ReceiverDashboard() {
                             type="button"
                             onClick={clearSearch}
                             className="clear-button"
+                            disabled={loading}
                         >
                             Clear Search
                         </button>
@@ -524,19 +540,9 @@ function ReceiverDashboard() {
                                     <p>Expires At: {new Date(listing.expiresAt).toLocaleDateString()}</p>
                                     <p>Posted by: {listing.postedBy.email}</p>
                                     {listing.status === 'available' && (
-                                        <button onClick={() => handleClaim(listing._id)}>Claim Listing</button>
-                                    )}
-                                    {listing.status === 'claimed' && (
-                                        <>
-                                            <p>Donor Contact: ${listing.postedBy.phone} (Phone), ${listing.postedBy.email} (Email)</p>
-                                            <button onClick={() => handleConfirmDeal(listing._id)}>Confirm Deal</button>
-                                        </>
-                                    )}
-                                    {listing.status === 'deal_confirmed' && (
-                                        <p>Deal confirmed! Locations have been emailed.</p>
-                                    )}
-                                    {listing.status === 'expired' && (
-                                        <p style={{ color: '#f44336' }}>This listing has expired.</p>
+                                        <button onClick={() => handleClaim(listing._id)} disabled={loading} className="claim-button">
+                                            Claim Listing
+                                        </button>
                                     )}
                                 </li>
                             ))}
@@ -563,7 +569,7 @@ function ReceiverDashboard() {
                                 Confirm Deal
                             </button>
                             <button
-                                id={`confirm-${listing._id}`}
+                                id={`confirm-receipt-${listing._id}`}
                                 onClick={() => handleConfirmReceipt(listing._id)}
                             >
                                 Confirm Receipt

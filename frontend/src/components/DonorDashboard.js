@@ -39,56 +39,48 @@ function DonorDashboard() {
     const markerRef = useRef(null);
     const suggestionTimeoutRef = useRef(null);
 
+    // Centralized function to fetch and sort donor's listings
+    const fetchListings = async () => {
+        try {
+            setLoading(true);
+            const token = sessionStorage.getItem('token'); // Changed to sessionStorage
+            const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+            const response = await axios.get(`${backendUrl}/api/food/my-listings`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            // Sort listings by createdAt in descending order (newest first)
+            const sortedListings = [...response.data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            setListings(sortedListings);
+            setErrors(prev => ({ ...prev, listings: '' }));
+        } catch (err) {
+            console.error('Fetch listings error:', {
+                status: err.response?.status,
+                data: err.response?.data,
+                message: err.message,
+            });
+            setErrors(prev => ({
+                ...prev,
+                listings: `Failed to fetch listings: ${err.response?.data?.error || err.message}.`
+            }));
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Fetch donor's listings on mount
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token'); // Changed to sessionStorage
         if (!token) {
             alert('Please log in to access the Donor Dashboard.');
             navigate('/login');
             return;
         }
-
-        const fetchListings = async () => {
-            try {
-                setLoading(true);
-                const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
-                const response = await axios.get(`${backendUrl}/api/food/all`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                // Fallback to auth middleware user ID if /api/user fails
-                let userId;
-                try {
-                    const userResponse = await axios.get(`${backendUrl}/api/user`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    userId = userResponse.data._id;
-                } catch (userErr) {
-                    console.warn('Failed to fetch user ID on mount:', userErr.response?.data || userErr.message);
-                    userId = 'fallback-user-id'; // Replace with actual logic or remove if not needed
-                }
-                setListings(response.data.filter(listing => listing.postedBy._id === userId));
-                setErrors(prev => ({ ...prev, listings: '' }));
-            } catch (err) {
-                console.error('Fetch listings error on mount:', {
-                    status: err.response?.status,
-                    data: err.response?.data,
-                    message: err.message,
-                });
-                setErrors(prev => ({
-                    ...prev,
-                    listings: `Failed to fetch listings: ${err.response?.statusText || err.message}. Check server or token.`
-                }));
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchListings();
     }, [navigate]);
 
     const fetchWastageReport = async (country) => {
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token'); // Changed to sessionStorage
             if (!token) {
                 alert('Please log in to fetch the wastage report.');
                 navigate('/login');
@@ -103,7 +95,7 @@ function DonorDashboard() {
         } catch (err) {
             if (err.response && err.response.status === 401) {
                 alert('Your session has expired. Please log in again.');
-                localStorage.removeItem('token');
+                sessionStorage.removeItem('token'); // Changed to sessionStorage
                 navigate('/login');
             } else {
                 console.error('Wastage report fetch error:', err);
@@ -384,7 +376,7 @@ function DonorDashboard() {
 
         setLoading(true);
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token'); // Changed to sessionStorage
             if (!token) {
                 alert('Please log in to create a listing.');
                 navigate('/login');
@@ -398,43 +390,22 @@ function DonorDashboard() {
             console.log('Creating listing with payload:', payload); // Debug payload
             const createResponse = await axios.post(`${backendUrl}/api/food`, payload, { headers: { Authorization: `Bearer ${token}` } });
             console.log('Create listing response:', createResponse.data);
-            alert('Food listing created successfully!');
+            alert('Food listing created successfully! Email notification status:', createResponse.data.emailStatus || 'Not provided');
 
             // Fetch updated listings
             setTitle(''); setDescription(''); setQuantity(''); setLocation(null); setExpiresIn(''); setExpiresUnit('days');
             setLocationSearch(''); setLocationSearchError(''); setSuggestions([]); setShowSuggestions(false);
             if (markerRef.current) markerRef.current.remove();
-            const updatedListingsResponse = await axios.get(`${backendUrl}/api/food/all`, { headers: { Authorization: `Bearer ${token}` } });
-            console.log('Fetch all listings response:', updatedListingsResponse.data);
-            let userId;
-            try {
-                const userResponse = await axios.get(`${backendUrl}/api/user`, { headers: { Authorization: `Bearer ${token}` } });
-                userId = userResponse.data._id;
-                console.log('Fetched User ID after create:', userId);
-            } catch (userErr) {
-                console.error('Failed to fetch user ID after create:', {
-                    status: userErr.response?.status,
-                    data: userErr.response?.data,
-                    message: userErr.message,
-                });
-                userId = 'fallback-user-id'; // Temporary fallback
-            }
-            setListings(updatedListingsResponse.data.filter(listing => listing.postedBy._id === userId));
+            await fetchListings(); // Refetch listings after creation
             if (countryInput) fetchWastageReport(countryInput);
         } catch (err) {
             console.error('Handle submit error:', {
-                step: err.config?.url === '/api/food' ? 'create' : err.config?.url === '/api/food/all' ? 'fetchAll' : 'fetchUser',
+                step: err.config?.url === '/api/food' ? 'create' : 'fetchMyListings',
                 status: err.response?.status,
                 data: err.response?.data,
                 message: err.message,
             });
-            if (err.response?.status === 401) {
-                alert('Your session has expired. Please log in again.');
-                localStorage.removeItem('token');
-                navigate('/login');
-            } else {
-                alert(err.response?.data?.error || 'Failed to create or update listing. Check the console for details.');
-            }
+            alert(`Failed to create listing. Email status: ${err.response?.data?.emailStatus || 'Unknown'}. Check console for details.`);
         } finally {
             setLoading(false);
         }
@@ -442,36 +413,24 @@ function DonorDashboard() {
 
     const handleAcceptRequest = async (listingId, receiverId) => {
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token'); // Changed to sessionStorage
             const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
-            await axios.put(
+            const response = await axios.put(
                 `${backendUrl}/api/food/accept-request/${listingId}`,
                 { receiverId },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            alert('Request accepted!');
-            const updatedListings = await axios.get(`${backendUrl}/api/food/all`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            let userId;
-            try {
-                const userResponse = await axios.get(`${backendUrl}/api/user`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                userId = userResponse.data._id;
-            } catch (userErr) {
-                console.warn('Failed to fetch user ID, using placeholder:', userErr);
-                userId = 'fallback-user-id'; // Replace with actual logic or remove if not needed
-            }
-            setListings(updatedListings.data.filter(listing => listing.postedBy._id === userId));
+            console.log('Accept request response:', response.data);
+            alert(`Request accepted! Email notification status: ${response.data.emailStatus || 'Not provided'}`);
+            await fetchListings(); // Refetch listings after accepting
         } catch (err) {
             console.error('Accept request error:', err);
-            alert(err.response?.data?.error || 'Failed to accept request. Check console for details.');
+            alert(`Failed to accept request. Email status: ${err.response?.data?.emailStatus || 'Unknown'}. Check console for details.`);
         }
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token'); // Changed to sessionStorage
         navigate('/login');
     };
 
@@ -735,8 +694,18 @@ function DonorDashboard() {
                                     </ul>
                                 </>
                             )}
-                            {listing.status === 'claimed' && (
-                                <p>Claimed by: {listing.claimedBy.email}</p>
+                            {listing.status === 'claimed' && listing.claimedBy && (
+                                <>
+                                    <p>Claimed by: {listing.claimedBy.email}</p>
+                                    {listing.claimedBy.phone && <p>Receiver Phone: {listing.claimedBy.phone}</p>}
+                                    {listing.claimedBy.location && (
+                                        <p>
+                                            Receiver Location: {listing.claimedBy.location.address} (
+                                            {listing.claimedBy.location.latitude.toFixed(4)},{' '}
+                                            {listing.claimedBy.location.longitude.toFixed(4)})
+                                        </p>
+                                    )}
+                                </>
                             )}
                             {listing.status === 'deal_confirmed' && (
                                 <p>Deal confirmed! Locations have been emailed.</p>

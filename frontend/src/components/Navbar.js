@@ -4,10 +4,10 @@ import '../styles/Navbar.css';
 
 function Navbar() {
     const navigate = useNavigate();
-    const token = localStorage.getItem('token'); // Check if user is logged in
+    const token = sessionStorage.getItem('token'); // Changed from localStorage
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token'); // Changed from localStorage
         navigate('/login');
     };
 

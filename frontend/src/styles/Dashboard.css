@@ -11,8 +11,7 @@
 
 /* Donor Dashboard Background */
 .donor-dashboard {
-    /* Background image with a semi-transparent gradient overlay to simulate opacity */
-    background: linear-gradient(rgba(33, 33, 33, 0.5), rgba(33, 33, 33, 0.5)), 
+    background: linear-gradient(rgba(33, 33, 33, 0.5), rgba(33, 33, 33, 0.5)),
                 url('https://media.istockphoto.com/id/1498170916/photo/a-couple-is-taking-a-bag-of-food-at-the-food-and-clothes-bank.jpg?s=612x612&w=0&k=20&c=0fnD_g46lvoZ5NdzX5zYOSM4PzM95ezfs5uMe9D1QKs=') no-repeat center center/cover;
     background-color: #303030; /* Fallback color (Dark Grey) */
     color: #FFFFFF; /* Default text color for better contrast */
@@ -20,14 +19,13 @@
 
 /* Receiver Dashboard Background */
 .receiver-dashboard {
-    /* Background image with a semi-transparent gradient overlay to simulate opacity */
-    background: linear-gradient(rgba(33, 33, 33, 0.6), rgba(33, 33, 33, 0.6)), 
+    background: linear-gradient(rgba(33, 33, 33, 0.6), rgba(33, 33, 33, 0.6)),
                 url('https://media.istockphoto.com/id/1433432507/photo/healthy-eating-plate-with-vegan-or-vegetarian-food-in-woman-hands-healthy-plant-based-diet.jpg?s=612x612&w=0&k=20&c=kQBPg4xNIiDMZ-Uu2r37OHZDQSaRroZlxo_YLioh5tA=') no-repeat center center/cover;
     background-color: #303030; /* Fallback color (Dark Grey) */
     color: #FFFFFF; /* Default text color for better contrast */
 }
 
-/* Dashboard Header (for DonorDashboard) */
+/* Dashboard Header (for both Donor and Receiver Dashboards) */
 .dashboard-header {
     display: flex;
     justify-content: space-between;
@@ -343,7 +341,8 @@
     color: #555;
 }
 
-.listing-item button {
+.listing-item button,
+.claim-button {
     padding: 10px 20px;
     background-color: #42A5F5; /* Blue button to match theme */
     color: #FFFFFF; /* White text */
@@ -356,17 +355,76 @@
     margin-top: 5px; /* Added for better spacing */
 }
 
-.listing-item button:hover {
+.listing-item button:hover,
+.claim-button:hover {
     background-color: #2196F3; /* Darker blue on hover */
     transform: scale(1.02);
 }
 
-.listing-item button:focus {
+.listing-item button:focus,
+.claim-button:focus {
     outline: 3px solid #64B5F6; /* Lighter blue for focus outline */
     outline-offset: 2px;
 }
 
-.listing-item button:disabled {
+.listing-item button:disabled,
+.claim-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.accept-button {
+    padding: 10px 20px;
+    background-color: #4caf50; /* Green for accept action */
+    color: #FFFFFF; /* White text */
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+    margin-left: 10px;
+}
+
+.accept-button:hover {
+    background-color: #45a049; /* Darker green on hover */
+    transform: scale(1.02);
+}
+
+.accept-button:focus {
+    outline: 3px solid #66BB6A; /* Lighter green for focus outline */
+    outline-offset: 2px;
+}
+
+.accept-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.confirm-button {
+    padding: 10px 20px;
+    background-color: #2196f3; /* Blue for confirm action */
+    color: #FFFFFF; /* White text */
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+    margin-left: 10px;
+}
+
+.confirm-button:hover {
+    background-color: #1976d2; /* Darker blue on hover */
+    transform: scale(1.02);
+}
+
+.confirm-button:focus {
+    outline: 3px solid #42a5f5; /* Lighter blue for focus outline */
+    outline-offset: 2px;
+}
+
+.confirm-button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
     transform: none;
@@ -654,8 +712,7 @@
     font-style: italic;
 }
 
-/* Directions and trends sections (for ReceiverDashboard) */
-.directions-container,
+/* Trends section (for ReceiverDashboard) */
 .trends-container {
     background-color: rgba(255, 255, 255, 0.95);
     padding: 20px;
@@ -666,14 +723,12 @@
     color: #333; /* Dark text for readability */
 }
 
-.directions-container h3,
 .trends-container h2 {
     font-size: 1.4rem;
     color: #333;
     margin-bottom: 15px;
 }
 
-.directions-container p,
 .trends-container p {
     font-size: 1rem;
     color: #555;
@@ -778,7 +833,9 @@
     .clear-button,
     .location-search-button,
     .location-clear-button,
-    .use-current-location-button {
+    .use-current-location-button,
+    .accept-button,
+    .confirm-button {
         width: 100%;
         padding: 12px;
     }
@@ -786,7 +843,6 @@
     .dashboard-form,
     .wastage-report-form form,
     .wastage-report-container,
-    .directions-container,
     .trends-container {
         padding: 20px;
     }
@@ -803,7 +859,10 @@
         padding: 15px;
     }
 
-    .listing-item button {
+    .listing-item button,
+    .claim-button,
+    .accept-button,
+    .confirm-button {
         width: 100%;
         margin: 5px 0;
     }
@@ -832,7 +891,9 @@
     .clear-button,
     .location-search-button,
     .location-clear-button,
-    .use-current-location-button {
+    .use-current-location-button,
+    .accept-button,
+    .confirm-button {
         padding: 10px;
         font-size: 0.9rem;
     }
@@ -849,6 +910,9 @@
     .dashboard-form textarea,
     .wastage-report-form input,
     .listing-item button,
+    .claim-button,
+    .accept-button,
+    .confirm-button,
     .wastage-report-form button {
         padding: 10px;
         font-size: 0.9rem;

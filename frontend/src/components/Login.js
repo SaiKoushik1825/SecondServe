@@ -40,7 +40,7 @@ function Login() {
             const response = await axios.post('http://localhost:5000/api/auth/login', { identifier, password });
             const { token } = response.data;
 
-            localStorage.setItem('token', token);
+            sessionStorage.setItem('token', token); // Changed from localStorage to sessionStorage
             navigate('/role-selection');
         } catch (err) {
             alert(err.response?.data?.error || 'Login failed. Check the console for details.');

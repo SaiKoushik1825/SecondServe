@@ -14,7 +14,7 @@ function RoleSelection() {
         const fetchUserRole = async () => {
             setFetching(true);
             try {
-                const token = localStorage.getItem('token');
+                const token = sessionStorage.getItem('token'); // Changed from localStorage
                 if (!token) {
                     alert('Please log in to select a role.');
                     navigate('/login');
@@ -34,8 +34,8 @@ function RoleSelection() {
                 console.error('Error fetching user role:', err);
                 if (err.response?.status === 401) {
                     alert('Your session has expired. Please log in again.');
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('userId');
+                    sessionStorage.removeItem('token'); // Changed from localStorage
+                    sessionStorage.removeItem('userId'); // Changed from localStorage
                     navigate('/login');
                 } else {
                     alert('Failed to fetch user role. Please try again.');
@@ -57,7 +57,7 @@ function RoleSelection() {
 
         setLoading(true);
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token'); // Changed from localStorage
             if (!token) {
                 alert('Please log in to select a role.');
                 navigate('/login');
@@ -77,8 +77,8 @@ function RoleSelection() {
             console.error('Role selection error:', err);
             if (err.response?.status === 401) {
                 alert('Your session has expired. Please log in again.');
-                localStorage.removeItem('token');
-                localStorage.removeItem('userId');
+                sessionStorage.removeItem('token'); // Changed from localStorage
+                sessionStorage.removeItem('userId'); // Changed from localStorage
                 navigate('/login');
             } else {
                 alert(err.response?.data?.error || 'Failed to update role. Check the console for details.');
