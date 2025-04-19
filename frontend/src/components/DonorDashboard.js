@@ -18,6 +18,30 @@ const DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
+// Static list of countries
+const countries = ['Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia',
+    'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin',
+    'Bhutan', 'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi',
+    'Cabo Verde', 'Cambodia', 'Cameroon', 'Canada', 'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia',
+    'Comoros', 'Congo (Congo-Brazzaville)', 'Costa Rica', 'Croatia', 'Cuba', 'Cyprus', 'Czechia (Czech Republic)',
+    'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea',
+    'Eritrea', 'Estonia', 'Eswatini', 'Ethiopia', 'Fiji', 'Finland', 'France', 'Gabon', 'Gambia', 'Georgia', 'Germany',
+    'Ghana', 'Greece', 'Grenada', 'Guatemala', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Honduras', 'Hungary',
+    'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jordan',
+    'Kazakhstan', 'Kenya', 'Kiribati', 'Kuwait', 'Kyrgyzstan', 'Laos', 'Latvia', 'Lebanon', 'Lesotho', 'Liberia',
+    'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali',
+    'Malta', 'Marshall Islands', 'Mauritania', 'Mauritius', 'Mexico', 'Micronesia', 'Moldova', 'Monaco', 'Mongolia',
+    'Montenegro', 'Morocco', 'Mozambique', 'Myanmar (Burma)', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'New Zealand',
+    'Nicaragua', 'Niger', 'Nigeria', 'North Korea', 'North Macedonia', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Panama',
+    'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Qatar', 'Romania', 'Russia', 'Rwanda',
+    'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe',
+    'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Solomon Islands',
+    'Somalia', 'South Africa', 'South Korea', 'South Sudan', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Sweden', 'Switzerland',
+    'Syria', 'Taiwan', 'Tajikistan', 'Tanzania', 'Thailand', 'Timor-Leste', 'Togo', 'Tonga', 'Trinidad and Tobago', 'Tunisia',
+    'Turkey', 'Turkmenistan', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay',
+    'Uzbekistan', 'Vanuatu', 'Vatican City', 'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe'
+];
+
 function DonorDashboard() {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -43,12 +67,11 @@ function DonorDashboard() {
     const fetchListings = async () => {
         try {
             setLoading(true);
-            const token = sessionStorage.getItem('token'); // Changed to sessionStorage
+            const token = sessionStorage.getItem('token');
             const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
             const response = await axios.get(`${backendUrl}/api/food/my-listings`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            // Sort listings by createdAt in descending order (newest first)
             const sortedListings = [...response.data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             setListings(sortedListings);
             setErrors(prev => ({ ...prev, listings: '' }));
@@ -69,7 +92,7 @@ function DonorDashboard() {
 
     // Fetch donor's listings on mount
     useEffect(() => {
-        const token = sessionStorage.getItem('token'); // Changed to sessionStorage
+        const token = sessionStorage.getItem('token');
         if (!token) {
             alert('Please log in to access the Donor Dashboard.');
             navigate('/login');
@@ -78,9 +101,13 @@ function DonorDashboard() {
         fetchListings();
     }, [navigate]);
 
+    // Fetch wastage report from backend with AI prediction
     const fetchWastageReport = async (country) => {
         try {
-            const token = sessionStorage.getItem('token'); // Changed to sessionStorage
+            if (!country) return;
+
+            setLoading(true);
+            const token = sessionStorage.getItem('token');
             if (!token) {
                 alert('Please log in to fetch the wastage report.');
                 navigate('/login');
@@ -91,12 +118,31 @@ function DonorDashboard() {
                 params: { country },
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setWastageReport(response.data);
+
+            const { averageWeeklyWastage, confidenceInterval, suggestion, quote } = response.data;
+            if (!averageWeeklyWastage || !suggestion || !quote) {
+                throw new Error('Invalid wastage report data from server.');
+            }
+
+            setWastageReport({
+                country,
+                averageWeeklyWastage,
+                confidenceInterval,
+                donationPerDay: (averageWeeklyWastage / 7).toFixed(2),
+                suggestion,
+                quote,
+            });
+            setErrors(prev => ({ ...prev, country: '' }));
         } catch (err) {
             if (err.response && err.response.status === 401) {
                 alert('Your session has expired. Please log in again.');
-                sessionStorage.removeItem('token'); // Changed to sessionStorage
+                sessionStorage.removeItem('token');
                 navigate('/login');
+            } else if (err.response && err.response.status === 403) {
+                setErrors(prev => ({
+                    ...prev,
+                    country: 'Access denied. Check your permissions or contact support.'
+                }));
             } else {
                 console.error('Wastage report fetch error:', err);
                 setErrors(prev => ({
@@ -104,31 +150,21 @@ function DonorDashboard() {
                     country: err.response?.data?.error || 'Failed to fetch wastage report.'
                 }));
             }
+            setWastageReport(null);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const validateWastageForm = () => {
-        let isValid = true;
-        setErrors(prev => ({
-            ...prev,
-            country: ''
-        }));
-
-        if (!countryInput.trim()) {
-            setErrors(prev => ({ ...prev, country: 'Please enter a country name.' }));
-            isValid = false;
-        } else if (!/^[A-Za-z\s]+$/.test(countryInput.trim())) {
-            setErrors(prev => ({ ...prev, country: 'Country name should only contain letters and spaces.' }));
-            isValid = false;
+    const handleCountryChange = (e) => {
+        const selectedCountry = e.target.value;
+        setCountryInput(selectedCountry);
+        if (selectedCountry) {
+            fetchWastageReport(selectedCountry);
+        } else {
+            setWastageReport(null);
+            setErrors(prev => ({ ...prev, country: 'Please select a country.' }));
         }
-
-        return isValid;
-    };
-
-    const handleCountrySubmit = (e) => {
-        e.preventDefault();
-        if (!validateWastageForm()) return;
-        fetchWastageReport(countryInput.trim());
     };
 
     const fetchSuggestions = async (query) => {
@@ -376,7 +412,7 @@ function DonorDashboard() {
 
         setLoading(true);
         try {
-            const token = sessionStorage.getItem('token'); // Changed to sessionStorage
+            const token = sessionStorage.getItem('token');
             if (!token) {
                 alert('Please log in to create a listing.');
                 navigate('/login');
@@ -392,11 +428,11 @@ function DonorDashboard() {
             console.log('Create listing response:', createResponse.data);
             alert('Food listing created successfully! Email notification status:', createResponse.data.emailStatus || 'Not provided');
 
-            // Fetch updated listings
+            // Reset form and refetch listings
             setTitle(''); setDescription(''); setQuantity(''); setLocation(null); setExpiresIn(''); setExpiresUnit('days');
             setLocationSearch(''); setLocationSearchError(''); setSuggestions([]); setShowSuggestions(false);
             if (markerRef.current) markerRef.current.remove();
-            await fetchListings(); // Refetch listings after creation
+            await fetchListings();
             if (countryInput) fetchWastageReport(countryInput);
         } catch (err) {
             console.error('Handle submit error:', {
@@ -413,7 +449,7 @@ function DonorDashboard() {
 
     const handleAcceptRequest = async (listingId, receiverId) => {
         try {
-            const token = sessionStorage.getItem('token'); // Changed to sessionStorage
+            const token = sessionStorage.getItem('token');
             const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
             const response = await axios.put(
                 `${backendUrl}/api/food/accept-request/${listingId}`,
@@ -422,7 +458,7 @@ function DonorDashboard() {
             );
             console.log('Accept request response:', response.data);
             alert(`Request accepted! Email notification status: ${response.data.emailStatus || 'Not provided'}`);
-            await fetchListings(); // Refetch listings after accepting
+            await fetchListings();
         } catch (err) {
             console.error('Accept request error:', err);
             alert(`Failed to accept request. Email status: ${err.response?.data?.emailStatus || 'Unknown'}. Check console for details.`);
@@ -430,14 +466,14 @@ function DonorDashboard() {
     };
 
     const handleLogout = () => {
-        sessionStorage.removeItem('token'); // Changed to sessionStorage
+        sessionStorage.removeItem('token');
         navigate('/login');
     };
 
     // Initialize the map
     useEffect(() => {
         if (!mapRef.current) {
-            mapRef.current = L.map('donor-map').setView([37.7749, -122.4194], 10);
+            mapRef.current = L.map('donor-map', { attributionControl: false }).setView([37.7749, -122.4194], 10);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -461,7 +497,7 @@ function DonorDashboard() {
         if (!mapRef.current) return;
 
         if (markerRef.current) {
-            markerRef.current.remove();
+            mapRef.current.removeLayer(markerRef.current);
             markerRef.current = null;
         }
 
@@ -495,36 +531,48 @@ function DonorDashboard() {
                 </button>
             </div>
 
-            {/* Country input form for wastage report */}
+            {/* Country selection form for wastage report */}
             <div className="wastage-report-form">
-                <h2>Food Wastage Report for 2025</h2>
-                <form onSubmit={handleCountrySubmit}>
+                <h2>Predicted Food Wastage Report for 2025</h2>
+                <form>
                     <div className="form-field">
-                        <label htmlFor="countryInput">Enter Country</label>
-                        <input
+                        <label htmlFor="countryInput">Select Country</label>
+                        <select
                             id="countryInput"
-                            type="text"
-                            placeholder="e.g., USA"
                             value={countryInput}
-                            onChange={(e) => setCountryInput(e.target.value)}
+                            onChange={handleCountryChange}
                             className={errors.country ? 'error' : ''}
-                        />
+                            disabled={loading}
+                        >
+                            <option value="">-- Select a country --</option>
+                            {countries.map((country, index) => (
+                                <option key={index} value={country}>
+                                    {country}
+                                </option>
+                            ))}
+                        </select>
                         {errors.country && <p className="error-message">{errors.country}</p>}
                     </div>
-                    <button type="submit">Get Wastage Report</button>
                 </form>
             </div>
 
-            {/* Display the wastage report */}
+            {/* Display the wastage report with insights */}
             {wastageReport && (
                 <div className="wastage-report-container">
-                    <h3>Wastage Report</h3>
+                    <h3>Wastage Report for {wastageReport.country}</h3>
                     <p>
-                        In <strong>{wastageReport.country}</strong>, the average weekly food wastage for 2025 is{' '}
-                        <strong>{wastageReport.averageWeeklyWastage} kg</strong>.
+                        predicted average weekly food wastage: <strong>{wastageReport.averageWeeklyWastage} kg</strong>.
+                    </p>
+                    {wastageReport.confidenceInterval && (
+                        <p>
+                            Confidence Interval: <strong>{wastageReport.confidenceInterval}</strong>.
+                        </p>
+                    )}
+                    <p>
+                        Average food donations per day: <strong>{wastageReport.donationPerDay} kg</strong>.
                     </p>
                     <p>Suggestion: {wastageReport.suggestion}</p>
-                    <p><em>Motivational Quote: "{wastageReport.quote}"</em></p>
+                    <p><em>{wastageReport.quote}</em></p>
                 </div>
             )}
 
@@ -669,12 +717,12 @@ function DonorDashboard() {
             {listings.length > 0 ? (
                 <ul className="listings-list">
                     {listings.map((listing) => (
-                        <li key={listing._id} className="listing-item">
+                        <li key={listing._id} className={`listing-item ${listing.status === 'expired' ? 'expired' : ''}`}>
                             <h3>{listing.title}</h3>
                             <p>{listing.description}</p>
-                            <p>Quantity: {listing.quantity} kg</p>
+                            <p>Quantity: <strong>{listing.quantity} kg</strong></p>
                             <p>Location: {listing.location.address}</p>
-                            <p>Status: {listing.status}</p>
+                            <p>Status: <span className={listing.status}>{listing.status}</span></p>
                             <p>Expires At: {new Date(listing.expiresAt).toLocaleString()}</p>
                             {listing.status === 'available' && listing.requestedBy && listing.requestedBy.length > 0 && (
                                 <>

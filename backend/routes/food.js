@@ -107,6 +107,7 @@ router.post('/', auth, async (req, res) => {
             location,
             country,
             postedBy: req.user._id,
+            createdAt: new Date(), // Explicitly set createdAt
         });
         await foodListing.save();
 
@@ -365,7 +366,7 @@ router.put('/confirm-receipt/:id', auth, async (req, res) => {
     }
 });
 
-// Calculate average weekly food wastage for a country for the year 2025
+// Calculate average weekly food wastage for a country for the year 2025 with AI
 router.get('/predict-waste', auth, async (req, res) => {
     try {
         const country = req.query.country;
@@ -373,29 +374,50 @@ router.get('/predict-waste', auth, async (req, res) => {
             return res.status(400).json({ error: 'Country query parameter is required', emailStatus: { success: false, message: 'No email sent' } });
         }
 
-        const startDate = new Date('2025-01-01T00:00:00Z');
-        const endDate = new Date(); // Current date: April 13, 2025
-
-        const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000;
-        const weeksInPeriod = (endDate - startDate) / millisecondsPerWeek;
-
-        const unclaimedListings = await FoodListing.find({
-            country: country,
-            status: { $in: ['available', 'expired'] },
+        // Fetch all available historical data
+        const startDate = new Date('2023-01-01T00:00:00Z'); // Broad range to capture all data
+        const endDate = new Date(); // Current time: April 19, 2025 01:14 PM PDT
+        const historicalData = await FoodListing.find({
+            country: { $regex: new RegExp(country, 'i') }, // Case-insensitive match
             createdAt: { $gte: startDate, $lte: endDate },
-        });
+        }).select('quantity createdAt status country');
+        console.log('All historical data found:', JSON.stringify(historicalData, null, 2));
 
-        const totalWastage = unclaimedListings.reduce((sum, listing) => sum + listing.quantity, 0);
-        const averageWeeklyWastage = weeksInPeriod > 0 ? totalWastage / weeksInPeriod : 0;
+        // Prepare data for xAI API with enhanced context for waste reduction
+        const aiInput = {
+            historicalData: historicalData.map(listing => ({
+                quantity: listing.quantity || 0,
+                date: listing.createdAt,
+                status: listing.status || 'unknown',
+            })),
+            context: 'Predict average weekly food wastage for 2025 based on all available historical data, including a confidence interval and specific insights/recommendations to reduce food waste (e.g., adjust expiration times, encourage faster donations, or target high-waste food types).',
+            country: country,
+        };
 
-        let suggestion = '';
-        if (averageWeeklyWastage > 10) {
-            suggestion = `The average weekly food wastage in ${country} for 2025 is ${averageWeeklyWastage.toFixed(2)} kg, which is relatively high. Consider donating more frequently or encouraging others in your area to donate to reduce waste.`;
-        } else if (averageWeeklyWastage > 0) {
-            suggestion = `The average weekly food wastage in ${country} for 2025 is ${averageWeeklyWastage.toFixed(2)} kg. This is a moderate amount. Keep donating to help reduce food waste in your area.`;
-        } else {
-            suggestion = `No food wastage recorded in ${country} for 2025. Great job! Keep donating to maintain this trend.`;
+        // AI integration: Call xAI API for prediction with waste reduction focus
+        let xaiResponse;
+        try {
+            xaiResponse = await axios.post('https://api.x.ai/v1/grok/predict', aiInput, {
+                headers: { Authorization: `Bearer ${process.env.XAI_API_KEY}` },
+            });
+            console.log('AI response:', xaiResponse.data);
+        } catch (aiErr) {
+            console.error('AI API error, falling back:', aiErr.message);
         }
+
+        const { prediction, confidenceInterval, suggestion } = xaiResponse?.data || {};
+
+        // Fallback to basic calculation with all 2025 data (not just available/expired)
+        const fallbackData = await FoodListing.find({
+            country: { $regex: new RegExp(country, 'i') }, // Case-insensitive match
+            createdAt: { $gte: new Date('2025-01-01T00:00:00Z'), $lte: endDate },
+        });
+        console.log('Fallback data for 2025 (all statuses):', JSON.stringify(fallbackData, null, 2));
+        const fallbackWastage = fallbackData.reduce((sum, listing) => sum + (listing.quantity || 0), 0);
+        const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000;
+        const weeksInPeriod = (endDate - new Date('2025-01-01T00:00:00Z')) / millisecondsPerWeek;
+        console.log('Weeks in period:', weeksInPeriod, 'Total fallback wastage:', fallbackWastage);
+        const averageWeeklyWastage = prediction || (weeksInPeriod > 0 ? fallbackWastage / weeksInPeriod : fallbackWastage); // Use total if no weeks
 
         const quote = getRandomQuote();
 
@@ -403,19 +425,20 @@ router.get('/predict-waste', auth, async (req, res) => {
         let emailStatus = { success: false, message: 'Email not sent' };
         if (user && user.email) {
             emailStatus = await sendEmail(user.email, 'Food Wastage Report for 2025', 
-                `Hello ${user.email},\n\nIn ${country}, the average weekly food wastage for 2025 is ${averageWeeklyWastage.toFixed(2)} kg. ${suggestion}\n\nMotivational Quote: "${quote}"\n\nThank you for using the Food Rescue Platform!`);
+                `Hello ${user.email},\n\nIn ${country}, the predicted average weekly food wastage for 2025 is ${prediction ? prediction.toFixed(2) : averageWeeklyWastage.toFixed(2)} kg${confidenceInterval ? ` (CI: ${confidenceInterval})` : ''}. ${suggestion || 'Consider donating more to reduce waste.'}\n\nMotivational Quote: "${quote}"\n\nThank you for using the Food Rescue Platform!`);
         }
 
         res.json({
-            averageWeeklyWastage: averageWeeklyWastage.toFixed(2),
+            averageWeeklyWastage: prediction ? prediction.toFixed(2) : averageWeeklyWastage.toFixed(2),
             country,
-            suggestion,
+            confidenceInterval: confidenceInterval || null,
+            suggestion: suggestion || 'Consider donating more to reduce waste.',
             quote,
             emailStatus,
         });
     } catch (err) {
-        console.error('Food wastage calculation error:', err);
-        res.status(500).json({ error: 'Failed to calculate food wastage. Check the console for details.', emailStatus: { success: false, message: err.message } });
+        console.error('Food wastage prediction error:', err);
+        res.status(500).json({ error: 'Failed to predict food wastage. Check the console for details.', emailStatus: { success: false, message: err.message } });
     }
 });
 
