@@ -28,7 +28,6 @@ function Home() {
                 console.log('User data received:', userResponse.data);
                 setUser(userResponse.data);
 
-                // Fetch listings using the same endpoint as DonorDashboard
                 if (userResponse.data.role === 'donor' || userResponse.data.role === 'receiver') {
                     console.log('Fetching listings...');
                     const listingsResponse = await axios.get(`${backendUrl}/api/food/my-listings`, {
@@ -76,7 +75,12 @@ function Home() {
                 <>
                     {user ? (
                         <section className="user-section">
-                            <h1>Welcome, {user.name || user.email || 'User'}!</h1>
+                            <h1>Welcome, {user.username || 'User'}!</h1>
+                            <div className="user-details">
+                                <p><strong>Username:</strong> {user.username || 'N/A'}</p>
+                                <p><strong>Email:</strong> {user.email || 'N/A'}</p>
+                                <p><strong>Phone:</strong> {user.phone || 'N/A'}</p>
+                            </div>
                             <p>Role: {user.role || 'Unknown'}</p>
                             <h2>Your {user.role === 'donor' ? 'Donations' : 'Received Listings'}</h2>
                             {listings.length > 0 ? (
@@ -108,7 +112,6 @@ function Home() {
                 </>
             ) : (
                 <>
-                    {/* Hero Section for non-logged-in users */}
                     <section className="hero-section">
                         <div className="hero-content">
                             <h1>Welcome to Second Serve</h1>
@@ -124,7 +127,6 @@ function Home() {
                         </div>
                     </section>
 
-                    {/* Features Section */}
                     <section className="features-section">
                         <h2>Why Second Serve?</h2>
                         <div className="features-grid">
@@ -146,7 +148,6 @@ function Home() {
                         </div>
                     </section>
 
-                    {/* Call-to-Action Section */}
                     <section className="cta-section">
                         <h2>Join Second Serve Today</h2>
                         <p>Be a part of our mission to give food a second chance and reduce waste!</p>
@@ -157,7 +158,6 @@ function Home() {
                 </>
             )}
 
-            {/* Footer Section */}
             <footer className="footer-section">
                 <p>Second Serve © 2025</p>
                 <div className="footer-links">

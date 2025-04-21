@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const User = require('../models/User');
-const OTP = require('../models/OTP'); // Import the new OTP model
+const OTP = require('../models/OTP');
 const auth = require('../middleware/auth');
 const router = express.Router();
 
@@ -18,23 +18,24 @@ const transporter = nodemailer.createTransport({
 
 // Sign-up
 router.post('/signup', async (req, res) => {
-    const { phone, email, password } = req.body;
+    const { username, phone, email, password } = req.body;
     try {
-        // Validate input
-        if (!phone || !email || !password) {
-            return res.status(400).json({ error: 'Phone, email, and password are required' });
+        console.log('Received body in signup:', req.body); // Debug log
+        if (!username || !phone || !email || !password) {
+            return res.status(400).json({ error: 'Username, phone, email, and password are required' });
         }
 
-        const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
+        const existingUser = await User.findOne({ $or: [{ email }, { phone }, { username }] });
         if (existingUser) {
-            return res.status(400).json({ error: 'User with this email or phone already exists' });
+            return res.status(400).json({ error: 'User with this email, phone, or username already exists' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new User({ phone, email, password: hashedPassword });
+        const user = new User({ username, phone, email, password: hashedPassword });
         await user.save();
 
-        res.status(201).json({ message: 'User created successfully' });
+        const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.status(201).json({ message: 'User created successfully', token });
     } catch (err) {
         console.error('Signup error:', err);
         res.status(400).json({ error: err.message });
@@ -49,7 +50,7 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ error: 'Identifier and password are required' });
         }
 
-        const user = await User.findOne({ $or: [{ phone: identifier }, { email: identifier }] });
+        const user = await User.findOne({ $or: [{ phone: identifier }, { email: identifier }, { username: identifier }] });
         if (!user) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
@@ -60,13 +61,12 @@ router.post('/login', async (req, res) => {
         }
 
         const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
         res.json({
             token,
             user: {
                 _id: user._id,
                 email: user.email,
-                role: user.role, // Return the actual role (could be null/undefined)
+                role: user.role,
             },
         });
     } catch (err) {
@@ -88,13 +88,9 @@ router.post('/forgot-password', async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // Generate a 6-digit OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-        // Save the OTP in the OTP model
         await OTP.create({ email, otp });
 
-        // Send the OTP via email
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
             to: email,
@@ -117,7 +113,6 @@ router.post('/reset-password', async (req, res) => {
             return res.status(400).json({ error: 'Email, OTP, and new password are required' });
         }
 
-        // Verify the OTP
         const otpRecord = await OTP.findOne({ email, otp });
         if (!otpRecord) {
             return res.status(400).json({ error: 'Invalid or expired OTP' });
@@ -128,11 +123,8 @@ router.post('/reset-password', async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // Hash the new password and update the user
         user.password = await bcrypt.hash(newPassword, 10);
         await user.save();
-
-        // Delete the OTP record
         await OTP.deleteOne({ email, otp });
 
         res.json({ message: 'Password reset successful' });
@@ -152,7 +144,6 @@ router.get('/user', auth, async (req, res) => {
     }
 });
 
-// Get Current User
 router.get('/me', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user._id).select('-password');
@@ -166,10 +157,9 @@ router.get('/me', auth, async (req, res) => {
     }
 });
 
-// Update User Role
 router.put('/role', auth, async (req, res) => {
     const { role } = req.body;
-    console.log('Received role:', role); // Debug log
+    console.log('Received role:', role);
     try {
         if (!role) {
             return res.status(400).json({ error: 'Role is required' });

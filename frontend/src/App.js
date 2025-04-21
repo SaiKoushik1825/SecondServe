@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import Contact from './components/Contact';
@@ -21,6 +21,11 @@ const NotFound = () => (
     </div>
 );
 
+const ProtectedRoute = ({ children }) => {
+    const token = sessionStorage.getItem('token');
+    return token ? children : <Navigate to="/login" replace />;
+};
+
 function App() {
     return (
         <Router>
@@ -35,10 +40,10 @@ function App() {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
 
-                {/* Protected Routes (for authenticated users) */}
-                <Route path="/role-selection" element={<RoleSelection />} />
-                <Route path="/donor-dashboard" element={<DonorDashboard />} />
-                <Route path="/receiver-dashboard" element={<ReceiverDashboard />} />
+                {/* Protected Routes */}
+                <Route path="/role-selection" element={<ProtectedRoute><RoleSelection /></ProtectedRoute>} />
+                <Route path="/donor-dashboard" element={<ProtectedRoute><DonorDashboard /></ProtectedRoute>} />
+                <Route path="/receiver-dashboard" element={<ProtectedRoute><ReceiverDashboard /></ProtectedRoute>} />
 
                 {/* Catch-all route for 404 errors */}
                 <Route path="*" element={<NotFound />} />

@@ -3,87 +3,91 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh; /* Ensure the background covers the entire viewport height */
-    padding: 20px; /* Add padding for smaller screens */
+    min-height: 100vh;
+    padding: 20px;
     box-sizing: border-box;
-    position: relative; /* Ensure positioning context for pseudo-elements if needed */
+    position: relative;
+    overflow: hidden; /* Prevent overflow from background images */
 }
 
 /* Page Backgrounds */
 .signup-page {
-    /* Background image with a semi-transparent gradient overlay to simulate opacity */
-    background: linear-gradient(rgba(33, 33, 33, 0.5), rgba(33, 33, 33, 0.5)), 
+    background: linear-gradient(rgba(33, 33, 33, 0.6), rgba(33, 33, 33, 0.6)), 
                 url('https://thumbs.dreamstime.com/b/traditional-south-indian-food-platter-rice-other-variety-items-served-banana-leaf-festival-occasion-270227163.jpg') no-repeat center center/cover;
     background-color: #303030; /* Fallback color (Dark Grey) */
 }
 
 .login-page {
-    /* Background image with a semi-transparent gradient overlay to simulate opacity */
-    background: linear-gradient(rgba(33, 33, 33, 0.5), rgba(33, 33, 33, 0.5)), 
+    background: linear-gradient(rgba(33, 33, 33, 0.6), rgba(33, 33, 33, 0.6)), 
                 url('https://thumbs.dreamstime.com/b/traditional-south-indian-food-platter-rice-other-variety-items-served-banana-leaf-festival-occasion-270227163.jpg') no-repeat center center/cover;
     background-color: #303030; /* Fallback color (Dark Grey) */
 }
 
 .role-selection-page {
-    /* Background image with a semi-transparent gradient overlay to simulate opacity */
-    background: linear-gradient(rgba(33, 33, 33, 0.5), rgba(33, 33, 33, 0.5)), 
+    background: linear-gradient(rgba(33, 33, 33, 0.6), rgba(33, 33, 33, 0.6)), 
                 url('https://www.foodinfotech.com/wp-content/uploads/2023/08/Untitled-design-10.jpg') no-repeat center center/cover;
     background-color: #303030; /* Fallback color (Dark Grey) */
 }
 
 .forgot-password-page {
-    background: linear-gradient(135deg, #212121 0%, #303030 100%); /* Charcoal Black to Dark Grey gradient */
+    background: linear-gradient(135deg, #212121 0%, #303030 100%);
 }
 
 .reset-password-page {
-    background: linear-gradient(135deg, #303030 0%, #424242 100%); /* Dark Grey to slightly lighter grey gradient */
+    background: linear-gradient(135deg, #303030 0%, #424242 100%);
 }
 
 /* Form styling */
 .auth-form {
-    background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white background */
+    background-color: rgba(255, 255, 255, 0.95);
     padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
     width: 100%;
-    max-width: 450px; /* Slightly wider form for better readability */
+    max-width: 450px;
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Increased spacing between elements */
-    transition: transform 0.3s ease;
+    gap: 25px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeIn 0.5s ease-in-out;
+    font-family: 'Times New Roman', serif; /* Set default font to Times New Roman */
 }
 
 .auth-form:hover {
-    transform: scale(1.01); /* Subtle scale effect on hover */
+    transform: scale(1.02);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
 }
 
 /* Form heading */
 .auth-form h1 {
-    font-size: 2rem; /* Larger heading */
-    color: #42A5F5; /* Blue for heading */
+    font-size: 2.2rem;
+    color: #42A5F5;
     text-align: center;
     margin-bottom: 10px;
-    font-weight: 600;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Form heading (h2 used in ForgotPassword.js) */
 .auth-form h2 {
-    font-size: 1.8rem; /* Slightly smaller than h1 */
-    color: #42A5F5; /* Blue for heading */
+    font-size: 1.9rem;
+    color: #42A5F5;
     text-align: center;
     margin-bottom: 10px;
-    font-weight: 600;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Form paragraph (e.g., instructions or success message) */
 .auth-form p {
     font-size: 1.1rem;
-    color: #555;
+    color: #666;
     text-align: center;
     margin-bottom: 20px;
+    line-height: 1.6;
 }
 
-/* Form field container (for label + input) */
+/* Form field container (for label + input/select) */
 .form-group {
     display: flex;
     flex-direction: column;
@@ -96,163 +100,233 @@
     font-weight: 500;
     color: #333;
     text-align: left;
+    transition: color 0.3s;
+}
+
+.auth-form label:hover {
+    color: #2196F3;
 }
 
 /* Form inputs */
 .auth-form input {
     padding: 14px;
     font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
     outline: none;
-    transition: border-color 0.3s, box-shadow 0.3s;
+    transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s;
+    background-color: #f9f9f9;
+    font-family: 'Times New Roman', serif; /* Apply Times New Roman to inputs */
 }
 
-/* Placeholder styling for inputs */
 .auth-form input::placeholder {
-    color: #999; /* Light gray placeholder text */
+    color: #999;
     font-style: italic;
 }
 
-/* Focus state for inputs */
 .auth-form input:focus {
-    border-color: #42A5F5; /* Blue border on focus */
-    box-shadow: 0 0 5px rgba(66, 165, 245, 0.3);
+    border-color: #42A5F5;
+    box-shadow: 0 0 8px rgba(66, 165, 245, 0.4);
+    background-color: #fff;
+}
+
+/* Form select (for identifier type) */
+.auth-form select {
+    padding: 14px;
+    font-size: 1rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s;
+    background-color: #f9f9f9;
+    font-family: 'Times New Roman', serif; /* Apply Times New Roman to select */
+    appearance: none; /* Remove default arrow */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    cursor: pointer;
+}
+
+.auth-form select:focus {
+    border-color: #42A5F5;
+    box-shadow: 0 0 8px rgba(66, 165, 245, 0.4);
+    background-color: #fff;
+}
+
+.auth-form select:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
 }
 
 /* Specific styling for OTP input (used in ForgotPassword.js) */
-.auth-form input[type="text"] {
-    letter-spacing: 5px; /* Add spacing between digits for better readability */
-    font-family: monospace; /* Use monospace font for OTP */
-    text-align: center; /* Center the OTP digits */
+.auth-form input[name="otp"] {
+    letter-spacing: 6px;
+    font-family: 'Courier New', monospace;
+    text-align: center;
+    text-transform: uppercase;
 }
 
-/* Error state for inputs */
-.auth-form input.error {
-    border-color: #F44336; /* Red border for errors */
+/* Error state for inputs and select */
+.auth-form input.error,
+.auth-form select.error {
+    border-color: #F44336;
+    background-color: #fff5f5;
+}
+
+.auth-form input.error:focus,
+.auth-form select.error:focus {
+    box-shadow: 0 0 8px rgba(244, 67, 54, 0.4);
 }
 
 /* Error message */
 .error {
     color: #F44336;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     margin-top: 5px;
     text-align: left;
+    padding: 5px 10px;
+    background-color: #ffebee;
+    border-radius: 4px;
+    font-family: 'Times New Roman', serif; /* Apply Times New Roman to error messages */
 }
 
 /* Success message (e.g., for ForgotPassword) */
 .success {
-    color: #42A5F5; /* Blue for success message */
+    color: #42A5F5;
     font-size: 1.1rem;
     text-align: center;
     margin: 10px 0;
+    padding: 10px;
+    background-color: #e3f2fd;
+    border-radius: 4px;
+    font-family: 'Times New Roman', serif; /* Apply Times New Roman to success messages */
 }
 
 /* Form buttons (e.g., Submit, Continue) */
 .auth-form button[type="submit"] {
     padding: 14px;
-    background-color: #42A5F5; /* Blue button */
-    color: #FFFFFF; /* White text */
+    background-color: #42A5F5;
+    color: #FFFFFF;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 1.1rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.1s;
+    transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    font-family: 'Times New Roman', serif; /* Apply Times New Roman to buttons */
 }
 
 .auth-form button[type="submit"]:hover {
-    background-color: #2196F3; /* Darker blue on hover */
-    transform: scale(1.02); /* Subtle scale effect */
+    background-color: #2196F3;
+    transform: scale(1.03);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .auth-form button[type="submit"]:focus {
-    outline: 3px solid #64B5F6; /* Lighter blue for focus outline */
+    outline: 3px solid #64B5F6;
     outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.5);
 }
 
 .auth-form button[type="submit"]:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
 }
 
 /* Role selection buttons */
 .role-buttons {
     display: flex;
     justify-content: space-between;
-    gap: 15px; /* Increased gap for better spacing */
+    gap: 15px;
 }
 
 .role-buttons button {
     flex: 1;
     padding: 14px;
-    background-color: #f5f5f5; /* Light gray background */
+    background-color: #f5f5f5;
     color: #333;
-    border: 2px solid #ccc;
-    border-radius: 6px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
     font-size: 1.1rem;
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.3s, border-color 0.3s, transform 0.1s;
+    transition: background-color 0.3s, border-color 0.3s, transform 0.1s, box-shadow 0.3s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-family: 'Times New Roman', serif; /* Apply Times New Roman to role buttons */
 }
 
 .role-buttons button:hover {
     background-color: #e0e0e0;
-    transform: scale(1.02); /* Subtle scale effect on hover */
+    transform: scale(1.03);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .role-buttons button:focus {
-    outline: 3px solid #64B5F6; /* Lighter blue for focus outline */
+    outline: 3px solid #64B5F6;
     outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.5);
 }
 
 .role-buttons button.selected {
-    background-color: #42A5F5; /* Blue background when selected */
-    color: #FFFFFF; /* White text */
+    background-color: #42A5F5;
+    color: #FFFFFF;
     border-color: #42A5F5;
+    box-shadow: 0 4px 10px rgba(66, 165, 245, 0.3);
 }
 
 .role-buttons button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
 }
 
 /* Links (e.g., "Forgot Password?", "Back to Login", "Signup here") */
 .auth-form a,
 .auth-form .link-button {
-    color: #42A5F5; /* Blue links */
+    color: #42A5F5;
     text-decoration: underline;
     font-weight: 500;
-    transition: color 0.3s;
+    transition: color 0.3s, transform 0.1s;
     background: none;
     border: none;
     cursor: pointer;
     font-size: 1rem;
+    padding: 5px;
+    font-family: 'Times New Roman', serif; /* Apply Times New Roman to links */
 }
 
 .auth-form a:hover,
 .auth-form .link-button:hover {
-    color: #2196F3; /* Darker blue on hover */
+    color: #2196F3;
+    transform: scale(1.05);
 }
 
 .auth-form a:focus,
 .auth-form .link-button:focus {
-    outline: 2px solid #64B5F6; /* Lighter blue for focus outline */
+    outline: 2px solid #64B5F6;
     outline-offset: 2px;
     border-radius: 3px;
+    box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.5);
 }
 
 /* Link container (e.g., "Back to Login" in ForgotPassword.js) */
 .auth-link {
     margin-top: 20px;
+    text-align: center;
 }
 
 /* Responsive design */
 @media (max-width: 480px) {
+    .auth-container {
+        padding: 10px; /* Reduced padding for smaller screens */
+    }
+
     .auth-form {
-        padding: 25px;
+        padding: 20px;
         max-width: 100%;
     }
 
@@ -269,6 +343,7 @@
     }
 
     .auth-form input,
+    .auth-form select,
     .auth-form button[type="submit"],
     .role-buttons button {
         padding: 12px;
@@ -276,7 +351,24 @@
     }
 
     .role-buttons {
-        flex-direction: column; /* Stack buttons vertically on small screens */
+        flex-direction: column;
         gap: 10px;
+    }
+
+    .auth-form a,
+    .auth-form .link-button {
+        font-size: 0.9rem;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

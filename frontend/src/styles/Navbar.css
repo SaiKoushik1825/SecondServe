@@ -1,3 +1,4 @@
+/* Base container for the navbar */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -5,40 +6,71 @@
     background-color: #212121; /* Charcoal Black background */
     padding: 15px 30px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative; /* Ensure positioning context for potential overlays */
 }
 
+/* Navbar brand */
 .navbar-brand a {
     font-size: 1.5rem;
     font-weight: 600;
     color: #FFFFFF; /* White text */
     text-decoration: none;
+    transition: color 0.3s;
 }
 
+.navbar-brand a:hover {
+    color: #E0E0E0; /* Light grey on hover */
+}
+
+/* Navbar links */
 .navbar-links {
     display: flex;
     list-style: none;
     margin: 0;
     padding: 0;
     gap: 20px;
-}
-
-.navbar-links li {
-    display: flex;
     align-items: center;
 }
 
+/* Welcome message */
+.navbar-links .welcome-message {
+    color: #FFFFFF; /* White text to match links */
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.1); /* Subtle background */
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.navbar-links .welcome-message:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #E0E0E0; /* Light grey on hover */
+}
+
+/* Links */
 .navbar-links a {
     color: #FFFFFF; /* White text */
     text-decoration: none;
     font-size: 1rem;
     font-weight: 500;
-    transition: color 0.3s;
+    transition: color 0.3s, transform 0.1s;
+    padding: 5px 10px;
+    border-radius: 5px;
 }
 
 .navbar-links a:hover {
-    color: #E0E0E0; /* Light grey on hover (unchanged for subtle effect) */
+    color: #E0E0E0; /* Light grey on hover */
+    transform: scale(1.05);
 }
 
+.navbar-links a:focus {
+    outline: 2px solid #64B5F6; /* Lighter blue for focus outline */
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.5);
+}
+
+/* Logout button */
 .navbar-links button.logout-button {
     padding: 8px 16px;
     background-color: #42A5F5; /* Blue for logout button */
@@ -47,17 +79,20 @@
     border-radius: 5px;
     font-size: 1rem;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.1s;
+    transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .navbar-links button.logout-button:hover {
     background-color: #2196F3; /* Darker blue on hover */
-    transform: scale(1.02);
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .navbar-links button.logout-button:focus {
     outline: 3px solid #64B5F6; /* Lighter blue for focus outline */
     outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.5);
 }
 
 /* Responsive design */
@@ -65,15 +100,39 @@
     .navbar {
         flex-direction: column;
         gap: 15px;
+        padding: 15px;
+    }
+
+    .navbar-brand a {
+        font-size: 1.3rem;
     }
 
     .navbar-links {
         flex-direction: column;
         gap: 10px;
+        width: 100%;
+    }
+
+    .navbar-links li {
+        width: 100%;
+    }
+
+    .navbar-links .welcome-message {
+        font-size: 0.9rem;
+        padding: 5px;
+        text-align: center;
+        color: #FFFFFF; /* Ensure white on mobile */
     }
 
     .navbar-links a,
     .navbar-links button.logout-button {
         font-size: 0.9rem;
+        width: 100%;
+        text-align: center;
+        padding: 10px;
+    }
+
+    .navbar-links a:hover {
+        transform: none; /* Disable scale on small screens */
     }
 }

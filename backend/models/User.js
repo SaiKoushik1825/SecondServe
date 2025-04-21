@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
+    username: {
+        type: String,
+        required: [true, 'Username is required'],
+        unique: true,
+        trim: true,
+    },
     phone: {
         type: String,
         required: [true, 'Phone number is required'],
@@ -21,7 +27,6 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         enum: ['donor', 'receiver'],
-        // Removed default: 'donor' to allow role to be undefined for new users
     },
     resetPasswordOTP: {
         type: String,
@@ -35,6 +40,14 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+});
+
+// Pre-save hook for additional validation
+userSchema.pre('save', function(next) {
+    if (this.phone && !/^\d{10}$/.test(this.phone)) {
+        return next(new Error('Phone number must be 10 digits'));
+    }
+    next();
 });
 
 module.exports = mongoose.model('User', userSchema);
